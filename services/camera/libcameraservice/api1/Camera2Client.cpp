@@ -843,6 +843,9 @@ void Camera2Client::stopPreview() {
     status_t res;
     if ( (res = checkPid(__FUNCTION__) ) != OK) return;
     stopPreviewL();
+    // psw0523 add
+    mStreamingProcessor->deletePreviewStreamNoLocked();
+    // end psw0523
 }
 
 void Camera2Client::stopPreviewL() {

@@ -56,4 +56,31 @@ const char *MEDIA_MIMETYPE_CONTAINER_WVM = "video/wvm";
 const char *MEDIA_MIMETYPE_TEXT_3GPP = "text/3gpp-tt";
 const char *MEDIA_MIMETYPE_TEXT_SUBRIP = "application/x-subrip";
 
+//////////////////////////////////////////////////////////////////////////////
+//
+//					Nexell Extended Media Defines
+//
+const char *MEDIA_MIMETYPE_CONTAINER_ASF = "video/asf";
+const char *MEDIA_MIMETYPE_CONTAINER_WMV = "video/wmv";
+const char *MEDIA_MIMETYPE_CONTAINER_RM = "video/rm";
+const char *MEDIA_MIMETYPE_CONTAINER_FLV = "video/flv";
+const char *MEDIA_MIMETYPE_CONTAINER_MOV = "video/mov";
+
+//	Video
+const char *MEDIA_MIMETYPE_VIDEO_VC1 = "video/vc1";
+const char *MEDIA_MIMETYPE_VIDEO_RV = "video/rv";
+const char *MEDIA_MIMETYPE_VIDEO_FLV = "video/flv";
+const char *MEDIA_MIMETYPE_VIDEO_DIV3 = "video/div3";
+const char *MEDIA_MIMETYPE_VIDEO_WMV = "video/wmv";
+
+//	Audio
+const char *MEDIA_MIMETYPE_AUDIO_AC3 = "audio/ac3";
+const char *MEDIA_MIMETYPE_AUDIO_RA = "audio/ra";
+const char *MEDIA_MIMETYPE_AUDIO_WMA = "audio/wma";
+const char *MEDIA_MIMETYPE_AUDIO_APE = "audio/ape";
+const char *MEDIA_MIMETYPE_AUDIO_DTS = "audio/dts";
+
+//
+//////////////////////////////////////////////////////////////////////////////
+
 }  // namespace android

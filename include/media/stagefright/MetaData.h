@@ -163,6 +163,26 @@ enum {
     kKeyPssh              = 'pssh',  // raw data
 };
 
+
+//
+//	For Nexell FFMPEG Extractor
+//
+enum {
+	kKeyRawCodecSpecificData = 'rcsd',
+	kKeyWMVVersion           = 'wmvv',
+	kTypeWMVVer_7            = 'wmv7',
+	kTypeWMVVer_8            = 'wmv8',
+	kTypeWMVVer_9            = 'wmv9',
+	kKeyWMAVersion           = 'wmav',
+	kTypeWMA                 = 'wma ',
+	kTypeWMAPro              = 'wmap',
+	kTypeWMALossLess         = 'wmal',
+	kKeyBitspersample        = 'bpsp',
+	kKeyBlockAlign           = 'baln',
+	kKeyFFCodecTag           = 'ffct',
+    kKeyMpegAudioLayer       = 'mpgl',
+};
+
 enum {
     kTypeESDS        = 'esds',
     kTypeAVCC        = 'avcc',

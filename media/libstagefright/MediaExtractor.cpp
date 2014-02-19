@@ -39,6 +39,10 @@
 #include <media/stagefright/MetaData.h>
 #include <utils/String8.h>
 
+#ifdef ENABLE_FFMPEG_EXTRACTOR
+#include <FFmpegExtractor.h>
+#endif
+
 namespace android {
 
 sp<MetaData> MediaExtractor::getMetaData() {
@@ -96,6 +100,26 @@ sp<MediaExtractor> MediaExtractor::Create(
         ret = new MPEG4Extractor(source);
     } else if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_MPEG)) {
         ret = new MP3Extractor(source, meta);
+    } else if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_OGG)) {
+        ret = new OggExtractor(source);
+#ifdef ENABLE_FFMPEG_EXTRACTOR	//	Added by Ray Park for FFMPEG Extractor 
+	}else if ( !strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_AVI) ){
+		ret = new FFmpegExtractor(source);
+	}else if ( !strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_ASF) ){
+		ret = new FFmpegExtractor(source);
+	}else if ( !strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_WMV) ){
+		ret = new FFmpegExtractor(source);
+	}else if ( !strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_RM) ){
+		ret = new FFmpegExtractor(source);
+	}else if ( !strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_FLV) ){
+		ret = new FFmpegExtractor(source);
+    }else if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_MATROSKA)) {
+        ret = new FFmpegExtractor(source);
+    }else if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_MPEG2TS)) {
+        ret = new FFmpegExtractor(source);
+    } else if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_MPEG2PS)) {
+        ret = new FFmpegExtractor(source);
+#endif
     } else if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_AMR_NB)
             || !strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_AMR_WB)) {
         ret = new AMRExtractor(source);

@@ -901,6 +901,14 @@ void MatroskaExtractor::addTracks() {
                             meta, codecPrivate, codecPrivateSize);
                 } else if (!strcmp("A_MPEG/L3", codecID)) {
                     meta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_AUDIO_MPEG);
+
+#if 1   //  Added by Ray Park Support AC3 & FLAC Container
+                } else if (!strcmp("A_AC3", codecID)) {
+                    meta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_AUDIO_AC3);
+                } else if (!strcmp("A_FLAC", codecID)) {
+                    meta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_AUDIO_FLAC);
+#endif
+
                 } else {
                     ALOGW("%s is not supported.", codecID);
                     continue;

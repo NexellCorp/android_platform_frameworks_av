@@ -94,6 +94,7 @@ sp<MediaExtractor> MediaExtractor::Create(
         }
     }
 
+#if 1
     MediaExtractor *ret = NULL;
     if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_MPEG4)
             || !strcasecmp(mime, "audio/mp4")) {
@@ -141,6 +142,73 @@ sp<MediaExtractor> MediaExtractor::Create(
     } else if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_MPEG2PS)) {
         ret = new MPEG2PSExtractor(source);
     }
+
+#else
+    MediaExtractor *ret = NULL;
+    if (!strcasecmp(mime, "audio/mp4")){
+        ret = new MPEG4Extractor(source);
+    } else if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_MPEG)) {
+        ret = new MP3Extractor(source, meta);
+    } else if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_OGG)) {
+        ret = new OggExtractor(source);
+    } else if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_AMR_NB)
+            || !strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_AMR_WB)) {
+        ret = new AMRExtractor(source);
+    } else if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_FLAC)) {
+        ret = new FLACExtractor(source);
+    } else if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_WAV)) {
+        ret = new WAVExtractor(source);
+    } else if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_WVM)) {
+        // Return now.  WVExtractor should not have the DrmFlag set in the block below.
+        return new WVMExtractor(source);
+    } else if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_AAC_ADTS)) {
+        ret = new AACExtractor(source, meta);
+#ifdef ENABLE_FFMPEG_EXTRACTOR  //  Added by Ray Park for FFMPEG Extractor
+
+#if 0   //  Disable default extractor
+    } else if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_MPEG4)) {
+        ret = new MPEG4Extractor(source);
+    } else if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_MATROSKA)) {
+        ret = new MatroskaExtractor(source);
+    } else if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_MPEG2TS)) {
+        ret = new MPEG2TSExtractor(source);
+    } else if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_MPEG2PS)) {
+        ret = new MPEG2PSExtractor(source);
+#endif  // #if 1
+    }else if ( !strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_WMV) ){
+        ret = new FFmpegExtractor(source);
+    }else if ( !strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_RM) ){
+        ret = new FFmpegExtractor(source);
+    }else if ( !strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_FLV) ){
+        ret = new FFmpegExtractor(source);
+    }else if ( !strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_AVI) ){
+        ret = new FFmpegExtractor(source);
+    }else if ( !strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_ASF) ){
+        ret = new FFmpegExtractor(source);
+
+    //  Duplicated Container
+    }else if ( !strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_MPEG4) ){
+        ret = new FFmpegExtractor(source);
+    }else if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_MATROSKA)) {
+        ret = new FFmpegExtractor(source);
+    }else if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_MPEG2TS)) {
+        ret = new FFmpegExtractor(source);
+    } else if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_MPEG2PS)) {
+        ret = new FFmpegExtractor(source);
+    } else if (!strcasecmp(mime, "video/ffmpeg")) {
+        ret = new FFmpegExtractor(source);
+#else   //  Default Extractor
+    } else if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_MPEG4)) {
+        ret = new MPEG4Extractor(source);
+    } else if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_MATROSKA)) {
+        ret = new MatroskaExtractor(source);
+    } else if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_MPEG2TS)) {
+        ret = new MPEG2TSExtractor(source);
+    } else if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_MPEG2PS)) {
+        ret = new MPEG2PSExtractor(source);
+#endif   //  ENABLE_FFMPEG_EXTRACTOR
+    }else{}
+#endif
 
     if (ret != NULL) {
        if (isDrm) {

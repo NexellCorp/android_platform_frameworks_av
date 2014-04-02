@@ -524,7 +524,6 @@ status_t OMXCodec::configureCodec(const sp<MetaData> &meta) {
 						return OMX_ErrorNotImplemented;
 					}
 
-					//	Enable ThumbNailMode
 					uint8_t *extData = new uint8_t[size + 4];
 					*((int32_t*)extData) = size;
 					memcpy( extData+4, data, size );
@@ -639,6 +638,9 @@ status_t OMXCodec::configureCodec(const sp<MetaData> &meta) {
         meta->findInt32(kKeyWMAVersion, &version);
         setWMAFormat(numChannels, sampleRate, blockAlign, bitRate, version);
      }
+
+#if 1
+
     else if ( !strncmp(mComponentName, "OMX.NX.AUDIO_DECODER", 20) && !strcasecmp(MEDIA_MIMETYPE_AUDIO_MPEG, mMIME) ) {
         int32_t version = 0;
         if( !meta->findInt32(kKeyMpegAudioLayer, &version ) )
@@ -647,6 +649,33 @@ status_t OMXCodec::configureCodec(const sp<MetaData> &meta) {
         CHECK(meta->findInt32(kKeySampleRate, &sampleRate));
         setMPGAuidoFormat(numChannels, sampleRate);
      }
+
+#else
+
+#if 0   //  Use MP3 Decoding to FFMPEG Audio Decoder ( Can Support Layer 1,2,3 )
+    else if ( !strncmp(mComponentName, "OMX.NX.AUDIO_DECODER", 20) && !strcasecmp(MEDIA_MIMETYPE_AUDIO_MPEG, mMIME) ) {
+        int32_t version = 0;
+        //if( !meta->findInt32(kKeyMpegAudioLayer, &version ) )
+        //    return ERROR_UNSUPPORTED;
+        CHECK(meta->findInt32(kKeyChannelCount, &numChannels));
+        CHECK(meta->findInt32(kKeySampleRate, &sampleRate));
+        setMPGAuidoFormat(numChannels, sampleRate);
+     }
+#endif
+#if 1   //  Use MP2 Decoding to FFMPEG Audio Decoder ( Can Support Layer 1,2,3 )
+    else if ( !strcasecmp(MEDIA_MIMETYPE_AUDIO_MPEG_LAYER_II, mMIME) ) {
+        int32_t version = 0;
+        //if( !meta->findInt32(kKeyMpegAudioLayer, &version ) )
+        //    return ERROR_UNSUPPORTED;
+        CHECK(meta->findInt32(kKeyChannelCount, &numChannels));
+        CHECK(meta->findInt32(kKeySampleRate, &sampleRate));
+        setMPGAuidoFormat(numChannels, sampleRate);
+     }
+#endif
+
+
+#endif
+
 #endif
 	else if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_AAC, mMIME)) {
         int32_t numChannels, sampleRate, aacProfile;
@@ -1546,7 +1575,8 @@ void OMXCodec::setComponentRole(
 		{ MEDIA_MIMETYPE_AUDIO_RA,
              "audio_decoder.ra", "audio_encoder.ra" },
 		{ MEDIA_MIMETYPE_AUDIO_WMA,
-             "audio_decoder.wma", "audio_encoder.wma" },
+             "audio_decoder.x-ms-wma", "audio_encoder.x-ms-wma" },
+
         { MEDIA_MIMETYPE_AUDIO_MPEG,
             "audio_decoder.mp3", "audio_encoder.mp3" },
         { MEDIA_MIMETYPE_AUDIO_MPEG_LAYER_I,
@@ -1574,7 +1604,7 @@ void OMXCodec::setComponentRole(
         { MEDIA_MIMETYPE_VIDEO_MPEG2,
             "video_decoder.mpeg2", "video_encoder.mpeg2" },
         { MEDIA_MIMETYPE_VIDEO_WMV,
-            "video_decoder.wmv", "video_encoder.wmv" },
+            "video_decoder.x-ms-wmv", "video_encoder.x-ms-wmv" },
         { MEDIA_MIMETYPE_VIDEO_RV,
             "video_decoder.rv", "video_encoder.rv" },
 

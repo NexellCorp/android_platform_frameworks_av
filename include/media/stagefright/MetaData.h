@@ -177,6 +177,12 @@ enum {
 	kTypeWMA                 = 'wma ',
 	kTypeWMAPro              = 'wmap',
 	kTypeWMALossLess         = 'wmal',
+
+    kKeyRVVersion            = 'rvvr',
+    kTypeRVVer_G2            = 'rvG2',
+    kTypeRVVer_8             = 'rvv8',
+    kTypeRVVer_9             = 'rvv9',
+
 	kKeyBitspersample        = 'bpsp',
 	kKeyBlockAlign           = 'baln',
 	kKeyFFCodecTag           = 'ffct',

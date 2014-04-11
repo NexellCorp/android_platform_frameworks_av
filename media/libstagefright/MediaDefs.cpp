@@ -63,13 +63,14 @@ const char *MEDIA_MIMETYPE_TEXT_SUBRIP = "application/x-subrip";
 const char *MEDIA_MIMETYPE_CONTAINER_ASF = "video/x-ms-asf";
 const char *MEDIA_MIMETYPE_CONTAINER_WMV = "video/x-ms-wmv";
 const char *MEDIA_MIMETYPE_CONTAINER_RM = "video/rm";
-const char *MEDIA_MIMETYPE_CONTAINER_FLV = "video/flv";
+const char *MEDIA_MIMETYPE_CONTAINER_FLV = "video/x-flv";
 const char *MEDIA_MIMETYPE_CONTAINER_MOV = "video/mov";
 
 //	Video
 const char *MEDIA_MIMETYPE_VIDEO_VC1 = "video/vc1";
-const char *MEDIA_MIMETYPE_VIDEO_RV = "video/rv";
-const char *MEDIA_MIMETYPE_VIDEO_FLV = "video/flv";
+const char *MEDIA_MIMETYPE_VIDEO_RV = "video/x-pn-realvideo";
+const char *MEDIA_MIMETYPE_VIDEO_FLV = "video/x-flv";
+const char *MEDIA_MIMETYPE_VIDEO_MP43 = "video/mp43";
 const char *MEDIA_MIMETYPE_VIDEO_DIV3 = "video/div3";
 const char *MEDIA_MIMETYPE_VIDEO_WMV = "video/x-ms-wmv";
 

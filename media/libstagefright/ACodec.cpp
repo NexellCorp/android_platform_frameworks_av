@@ -981,8 +981,10 @@ status_t ACodec::setComponentRole(
             "video_decoder.mpeg2", "video_encoder.mpeg2" },
         { MEDIA_MIMETYPE_VIDEO_WMV,
             "video_decoder.x-ms-wmv", "video_encoder.x-ms-wmv" },
+        { MEDIA_MIMETYPE_VIDEO_MP43,
+            "video_decoder.mp43", "video_encoder.mp43" },
         { MEDIA_MIMETYPE_VIDEO_RV,
-            "video_decoder.rv", "video_encoder.rv" },
+            "video_decoder.x-pn-realvideo", "video_encoder.x-pn-realvideo" },
 
         { MEDIA_MIMETYPE_VIDEO_H263,
             "video_decoder.h263", "video_encoder.h263" },

@@ -1070,7 +1070,7 @@ void Camera2Client::stopRecording() {
     // psw0523 add
     }
 
-    mStreamingProcessor->deleteRecordingStreamLocked();
+    //mStreamingProcessor->deleteRecordingStreamLocked();
     // end psw0523
 }
 

@@ -1036,9 +1036,7 @@ status_t Camera2Client::startRecordingL(Parameters &params, bool restart) {
 void Camera2Client::stopRecording() {
     ATRACE_CALL();
     ALOGV("%s: E", __FUNCTION__);
-    // psw0523 add
-    {
-    // end psw0523
+
     Mutex::Autolock icl(mBinderSerializationLock);
     SharedParameters::Lock l(mParameters);
 
@@ -1048,6 +1046,9 @@ void Camera2Client::stopRecording() {
     switch (l.mParameters.state) {
         case Parameters::RECORD:
             // OK to stop
+            // psw0523 add
+            ALOGV("call deleteRecordingStreamLocked");
+            mStreamingProcessor->deleteRecordingStreamLocked();
             break;
         case Parameters::STOPPED:
         case Parameters::PREVIEW:
@@ -1067,11 +1068,6 @@ void Camera2Client::stopRecording() {
         ALOGE("%s: Camera %d: Unable to return to preview",
                 __FUNCTION__, mCameraId);
     }
-    // psw0523 add
-    }
-
-    mStreamingProcessor->deleteRecordingStreamLocked();
-    // end psw0523
 }
 
 bool Camera2Client::recordingEnabled() {

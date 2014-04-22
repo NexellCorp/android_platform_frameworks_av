@@ -6,6 +6,9 @@ LOCAL_SRC_FILES:=                     \
         SoftwareRenderer.cpp
 
 LOCAL_C_INCLUDES := \
+		$(TOP)/system/core/include \
+		$(TOP)/hardware/libhardware/include \
+		$(TOP)/hardware/nexell/pyrope/include \
         $(TOP)/frameworks/native/include/media/openmax \
         $(TOP)/hardware/msm7k
 

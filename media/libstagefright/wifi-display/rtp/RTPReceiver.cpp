@@ -249,7 +249,7 @@ void RTPReceiver::Source::queuePacket(const sp<ABuffer> &packet) {
 
     if (mAwaitingExtSeqNo >= 0 && newExtendedSeqNo < mAwaitingExtSeqNo) {
         // We're no longer interested in these. They're old.
-        ALOGV("dropping stale extSeqNo %d", newExtendedSeqNo);
+        ALOGD("dropping stale extSeqNo %d", newExtendedSeqNo);
 
         modifyPacketStatus(newExtendedSeqNo, STATUS_ARRIVED_LATE);
         return;
@@ -268,6 +268,7 @@ void RTPReceiver::Source::queuePacket(const sp<ABuffer> &packet) {
 
         if (extendedSeqNo == newExtendedSeqNo) {
             // Duplicate packet.
+            ALOGE("%s: Duplicate packet", __func__);
             return;
         }
 
@@ -351,14 +352,16 @@ void RTPReceiver::Source::dequeueMore() {
         CHECK(packet->meta()->findInt32("PT", &packetType));
 
         if (packetType != mActivePacketType) {
+            ALOGD("create Assembler");
             mActiveAssembler = mReceiver->makeAssembler(packetType);
             mActivePacketType = packetType;
         }
 
         if (mActiveAssembler != NULL) {
+            ALOGV("call Assembler->processPacktet");
             status_t err = mActiveAssembler->processPacket(packet);
             if (err != OK) {
-                ALOGV("assembler returned error %d", err);
+                ALOGE("assembler returned error %d", err);
             }
         }
 
@@ -870,8 +873,10 @@ void RTPReceiver::notifyPacketLost() {
 
 status_t RTPReceiver::onRTPData(const sp<ABuffer> &buffer) {
     size_t size = buffer->size();
+    ALOGV("%s: size %d", __func__, size);
     if (size < 12) {
         // Too short to be a valid RTP header.
+        ALOGE("%s: error %d", __func__, __LINE__);
         return ERROR_MALFORMED;
     }
 
@@ -879,6 +884,7 @@ status_t RTPReceiver::onRTPData(const sp<ABuffer> &buffer) {
 
     if ((data[0] >> 6) != 2) {
         // Unsupported version.
+        ALOGE("%s: error %d", __func__, __LINE__);
         return ERROR_UNSUPPORTED;
     }
 
@@ -890,6 +896,7 @@ status_t RTPReceiver::onRTPData(const sp<ABuffer> &buffer) {
         if (paddingLength + 12 > size) {
             // If we removed this much padding we'd end up with something
             // that's too short to be a valid RTP header.
+            ALOGE("%s: error %d", __func__, __LINE__);
             return ERROR_MALFORMED;
         }
 
@@ -902,6 +909,7 @@ status_t RTPReceiver::onRTPData(const sp<ABuffer> &buffer) {
 
     if (size < payloadOffset) {
         // Not enough data to fit the basic header and all the CSRC entries.
+        ALOGE("%s: error %d", __func__, __LINE__);
         return ERROR_MALFORMED;
     }
 
@@ -911,7 +919,7 @@ status_t RTPReceiver::onRTPData(const sp<ABuffer> &buffer) {
         if (size < payloadOffset + 4) {
             // Not enough data to fit the basic header, all CSRC entries
             // and the first 4 bytes of the extension header.
-
+            ALOGE("%s: error %d", __func__, __LINE__);
             return ERROR_MALFORMED;
         }
 
@@ -921,6 +929,7 @@ status_t RTPReceiver::onRTPData(const sp<ABuffer> &buffer) {
             4 * (extensionData[2] << 8 | extensionData[3]);
 
         if (size < payloadOffset + 4 + extensionLength) {
+            ALOGE("%s: error %d", __func__, __LINE__);
             return ERROR_MALFORMED;
         }
 
@@ -1075,9 +1084,11 @@ sp<RTPReceiver::Assembler> RTPReceiver::makeAssembler(uint8_t packetType) {
     switch (mode) {
         case PACKETIZATION_NONE:
         case PACKETIZATION_TRANSPORT_STREAM:
+            ALOGD("%s: create TSAssembler", __func__);
             return new TSAssembler(mNotify);
 
         case PACKETIZATION_H264:
+            ALOGD("%s: create H264Assembler", __func__);
             return new H264Assembler(mNotify);
 
         default:

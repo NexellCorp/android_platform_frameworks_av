@@ -351,6 +351,7 @@ void WifiDisplaySink::onMediaReceiverNotify(const sp<AMessage> &msg) {
 
         case MediaReceiver::kWhatAccessUnit:
         {
+            ALOGV("%s: get kWhatAccessUnit", __func__);
             if (mRenderer == NULL) {
                 mRenderer = new DirectRenderer(mSurfaceTex);
                 looper()->registerHandler(mRenderer);
@@ -584,7 +585,7 @@ void WifiDisplaySink::onReceiveClientData(const sp<AMessage> &msg) {
     sp<ParsedMessage> data =
         static_cast<ParsedMessage *>(obj.get());
 
-    ALOGV("session %d received '%s'",
+    ALOGD("session %d received '%s'",
           sessionID, data->debugString().c_str());
 
     AString method;

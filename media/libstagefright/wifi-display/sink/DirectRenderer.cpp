@@ -164,6 +164,7 @@ status_t DirectRenderer::DecoderContext::init(
             false /* canCallJava */,
             PRIORITY_DEFAULT);
 
+    ALOGD("%s: mime %s", __func__, mime.c_str());
     mDecoder = MediaCodec::CreateByType(
             mDecoderLooper, mime.c_str(), false /* encoder */);
 
@@ -558,6 +559,7 @@ void DirectRenderer::onQueueAccessUnit(const sp<AMessage> &msg) {
     CHECK_LT(trackIndex, 2u);
     CHECK(mDecoderContext[trackIndex] != NULL);
 
+    ALOGV("%s: %d", __func__, trackIndex);
     mDecoderContext[trackIndex]->queueInputBuffer(accessUnit);
 }
 

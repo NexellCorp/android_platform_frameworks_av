@@ -99,26 +99,26 @@ status_t RTPReceiver::H264Assembler::internalProcessPacket(
         case 0:
         {
             if (size < 1 || (data[0] & 0x80)) {
-                ALOGV("Malformed H264 RTP packet (empty or F-bit set)");
+                ALOGE("Malformed H264 RTP packet (empty or F-bit set)");
                 return ERROR_MALFORMED;
             }
 
             unsigned nalType = data[0] & 0x1f;
             if (nalType >= 1 && nalType <= 23) {
                 addSingleNALUnit(packet);
-                ALOGV("added single NAL packet");
+                ALOGE("added single NAL packet");
             } else if (nalType == 28) {
                 // FU-A
                 unsigned indicator = data[0];
                 CHECK((indicator & 0x1f) == 28);
 
                 if (size < 2) {
-                    ALOGV("Malformed H264 FU-A packet (single byte)");
+                    ALOGE("Malformed H264 FU-A packet (single byte)");
                     return ERROR_MALFORMED;
                 }
 
                 if (!(data[1] & 0x80)) {
-                    ALOGV("Malformed H264 FU-A packet (no start bit)");
+                    ALOGE("Malformed H264 FU-A packet (no start bit)");
                     return ERROR_MALFORMED;
                 }
 
@@ -141,7 +141,7 @@ status_t RTPReceiver::H264Assembler::internalProcessPacket(
                     addSingleNALUnit(mAccumulator);
                     clearAccumulator();
 
-                    ALOGV("added FU-A");
+                    ALOGE("added FU-A");
                     break;
                 }
 
@@ -154,7 +154,7 @@ status_t RTPReceiver::H264Assembler::internalProcessPacket(
                     return err;
                 }
             } else {
-                ALOGV("Malformed H264 packet (unknown type %d)", nalType);
+                ALOGE("Malformed H264 packet (unknown type %d)", nalType);
                 return ERROR_UNSUPPORTED;
             }
             break;
@@ -166,7 +166,7 @@ status_t RTPReceiver::H264Assembler::internalProcessPacket(
                     || data[0] != mIndicator
                     || (data[1] & 0x1f) != mNALType
                     || (data[1] & 0x80)) {
-                ALOGV("Malformed H264 FU-A packet (indicator, "
+                ALOGE("Malformed H264 FU-A packet (indicator, "
                       "type or start bit mismatch)");
 
                 return ERROR_MALFORMED;
@@ -180,7 +180,7 @@ status_t RTPReceiver::H264Assembler::internalProcessPacket(
                 clearAccumulator();
                 mState = 0;
 
-                ALOGV("added FU-A");
+                ALOGD("added FU-A");
             }
             break;
         }

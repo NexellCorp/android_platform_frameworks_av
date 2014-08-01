@@ -128,8 +128,10 @@ LOCAL_C_INCLUDES += $(FFMPEG_PATH)/include \
 		$(TOP)/hardware/nexell/pyrope/omx/extractor/ffmpeg \
 		$(LOCAL_PATH)/ffmpegExtractor
 
-LOCAL_LDFLAGS += \
-	-L$(LOCAL_PATH)/ffmpegExtractor -lNX_FFMpegExtractor
+#LOCAL_LDFLAGS += \
+#	-L$(LOCAL_PATH)/ffmpegExtractor -lNX_FFMpegExtractor
+
+LOCAL_STATIC_LIBRARIES += libNX_FFMpegExtractor
 #include hardware/nexell/pyrope/omx/extractor/ffmpeg/Android.mk
 
 LOCAL_LDFLAGS += \

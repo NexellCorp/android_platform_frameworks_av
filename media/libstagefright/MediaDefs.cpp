@@ -68,6 +68,7 @@ const char *MEDIA_MIMETYPE_CONTAINER_MOV = "video/mov";
 
 //	Video
 const char *MEDIA_MIMETYPE_VIDEO_VC1 = "video/vc1";
+const char *MEDIA_MIMETYPE_VIDEO_WVC1 = "video/wvc1";
 const char *MEDIA_MIMETYPE_VIDEO_RV = "video/x-pn-realvideo";
 const char *MEDIA_MIMETYPE_VIDEO_FLV = "video/x-flv";
 const char *MEDIA_MIMETYPE_VIDEO_MP43 = "video/mp43";

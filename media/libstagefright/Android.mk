@@ -136,12 +136,12 @@ LOCAL_STATIC_LIBRARIES += libNX_FFMpegExtractor
 
 LOCAL_LDFLAGS += \
 	-L$(FFMPEG_PATH)/libs	\
-	-lavutil-1.2 			\
-	-lavcodec-1.2   		\
-	-lavformat-1.2			\
-	-lavdevice-1.2			\
-	-lavfilter-1.2			\
-	-lavresample-1.2
+	-lavutil-2.1.4 		\
+	-lavcodec-2.1.4  	\
+	-lavformat-2.1.4	\
+	-lavdevice-2.1.4	\
+	-lavfilter-2.1.4	\
+	-lavresample-2.1.4
 endif	#	EN_FFMPEG_EXTRACTOR
 
 

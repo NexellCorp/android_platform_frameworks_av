@@ -59,8 +59,8 @@ sp<MediaExtractor> MediaExtractor::Create(
     sp<AMessage> meta;
 
     String8 tmp;
+    float confidence;
     if (mime == NULL) {
-        float confidence;
         if (!source->sniff(&tmp, &confidence, &meta)) {
             ALOGV("FAILED to autodetect media content.");
 
@@ -94,6 +94,8 @@ sp<MediaExtractor> MediaExtractor::Create(
         }
     }
 
+    ALOGI("Autodetected media content as '%s' with confidence %.2f", mime, confidence);
+
     MediaExtractor *ret = NULL;
     if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_MPEG4)){
         ret = new MPEG4Extractor(source);
@@ -126,7 +128,7 @@ sp<MediaExtractor> MediaExtractor::Create(
         ret = new WAVExtractor(source);
     } else if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_OGG)) {
         ret = new OggExtractor(source);
-    } else if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_MATROSKA)) {
+    } else if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_MATROSKA) && confidence>0.59f) {
         ret = new MatroskaExtractor(source);
     } else if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_MPEG2TS)) {
         ret = new MPEG2TSExtractor(source);
@@ -135,7 +137,7 @@ sp<MediaExtractor> MediaExtractor::Create(
         return new WVMExtractor(source);
     } else if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_AAC_ADTS)) {
         ret = new AACExtractor(source, meta);
-    } else if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_MPEG2PS)) {
+    } else if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_MPEG2PS)&&confidence>0.24f) {
         ret = new MPEG2PSExtractor(source);
 #ifdef ENABLE_FFMPEG_EXTRACTOR   //  Added by Ray Park for FFMPEG Extractor 
     }else if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_MATROSKA)) {

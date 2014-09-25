@@ -649,6 +649,14 @@ status_t OMXCodec::configureCodec(const sp<MetaData> &meta) {
         CHECK(meta->findInt32(kKeySampleRate, &sampleRate));
         setMPGAuidoFormat(numChannels, sampleRate);
      }
+    else if ( !strncmp(mComponentName, "OMX.NX.AUDIO_DECODER", 20) && !strcasecmp(MEDIA_MIMETYPE_AUDIO_MPEG_LAYER_II, mMIME) ) {
+        int32_t version = 0;
+        //if( !meta->findInt32(kKeyMpegAudioLayer, &version ) )
+        //    return ERROR_UNSUPPORTED;
+        CHECK(meta->findInt32(kKeyChannelCount, &numChannels));
+        CHECK(meta->findInt32(kKeySampleRate, &sampleRate));
+        setMPGAuidoFormat(numChannels, sampleRate);
+     }
 
 #else
 

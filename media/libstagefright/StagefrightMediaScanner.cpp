@@ -44,7 +44,7 @@ static bool FileHasAcceptableExtension(const char *extension) {
         ".mkv", ".mka", ".webm", ".ts", ".fl", ".flac", ".mxmf",
         ".avi", ".mpeg", ".mpg", ".awb", ".mpga",
 // Added by Ray Park
-		".rmvb", ".asf", ".wmv", ".rv", ".trp", ".tp", ".rm", ".flv"
+		".rmvb", ".asf", ".wmv", ".rv", ".trp", ".tp", ".rm", ".flv", ".mov"
     };
     static const size_t kNumValidExtensions =
         sizeof(kValidExtensions) / sizeof(kValidExtensions[0]);

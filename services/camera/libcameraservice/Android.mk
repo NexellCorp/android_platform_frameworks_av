@@ -75,6 +75,11 @@ LOCAL_C_INCLUDES += \
 
 LOCAL_CFLAGS += -Wall -Wextra
 
+# psw0523 add for pyrope
+ifeq ($(TARGET_BOARD_PLATFORM), pyrope)
+	LOCAL_CFLAGS += -DPATCH_FOR_PYROPE
+endif
+
 LOCAL_MODULE:= libcameraservice
 
 include $(BUILD_SHARED_LIBRARY)

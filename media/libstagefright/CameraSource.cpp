@@ -711,6 +711,10 @@ status_t CameraSource::reset() {
         ALOGW("%d long delays between neighboring video frames", mNumGlitches);
     }
 
+    // psw0523 patch for timelapse recording bug
+    mNumFramesReceived = mNumFramesEncoded + mNumFramesDropped;
+    // end psw0523
+
     CHECK_EQ(mNumFramesReceived, mNumFramesEncoded + mNumFramesDropped);
     ALOGD("reset: X");
     return OK;
@@ -858,6 +862,63 @@ void CameraSource::dataCallbackTimestamp(int64_t timestampUs,
         mStartTimeUs, timeUs);
     mFrameAvailableCondition.signal();
 }
+
+// psw0523 patch for timelapse recording bug
+void CameraSource::dataCallbackTimestampTimelapse(int64_t timestampUs,
+        int32_t msgType, const sp<IMemory> &data) {
+    ALOGV("dataCallbackTimestamp: timestamp %lld us", timestampUs);
+    Mutex::Autolock autoLock(mLock);
+    if (!mStarted || (mNumFramesReceived == 0 && timestampUs < mStartTimeUs)) {
+        ALOGV("Drop frame at %lld/%lld us", timestampUs, mStartTimeUs);
+        releaseOneRecordingFrame(data);
+        return;
+    }
+
+    if (mNumFramesReceived > 0) {
+        CHECK(timestampUs > mLastFrameTimestampUs);
+        if (timestampUs - mLastFrameTimestampUs > mGlitchDurationThresholdUs) {
+            ++mNumGlitches;
+        }
+    }
+
+    // May need to skip frame or modify timestamp. Currently implemented
+    // by the subclass CameraSourceTimeLapse.
+    if (skipCurrentFrame(timestampUs)) {
+        releaseOneRecordingFrame(data);
+        return;
+    }
+
+    mLastFrameTimestampUs = timestampUs;
+    if (mNumFramesReceived == 0) {
+        mFirstFrameTimeUs = timestampUs;
+        // Initial delay
+        if (mStartTimeUs > 0) {
+            if (timestampUs < mStartTimeUs) {
+                // Frame was captured before recording was started
+                // Drop it without updating the statistical data.
+                ALOGD("Drop first frame at %lld/%lld us", timestampUs, mStartTimeUs);
+                releaseOneRecordingFrame(data);
+                return;
+            }
+            mStartTimeUs = timestampUs - mStartTimeUs;
+        }
+    }
+    ++mNumFramesReceived;
+    if (mNumFramesReceived == 1) {
+        ALOGD("Drop first frame!!!");
+        releaseOneRecordingFrame(data);
+        return;
+    }
+
+    CHECK(data != NULL && data->size() > 0);
+    mFramesReceived.push_back(data);
+    int64_t timeUs = mStartTimeUs + (timestampUs - mFirstFrameTimeUs);
+    mFrameTimes.push_back(timeUs);
+    ALOGD("initial delay: %lld, current time stamp: %lld",
+        mStartTimeUs, timeUs);
+    mFrameAvailableCondition.signal();
+}
+// end psw0523
 
 bool CameraSource::isMetaDataStoredInVideoBuffers() const {
     ALOGV("isMetaDataStoredInVideoBuffers");

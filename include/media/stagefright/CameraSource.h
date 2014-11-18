@@ -184,6 +184,10 @@ protected:
 
     virtual void dataCallbackTimestamp(int64_t timestampUs, int32_t msgType,
             const sp<IMemory> &data);
+    // psw0523 patch for timelapse recording bug
+    void dataCallbackTimestampTimelapse(int64_t timestampUs, int32_t msgType,
+            const sp<IMemory> &data);
+    // end psw0523
 
 private:
     friend class CameraSourceListener;

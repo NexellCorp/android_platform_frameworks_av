@@ -300,7 +300,12 @@ void CameraSourceTimeLapse::dataCallbackTimestamp(int64_t timestampUs, int32_t m
             const sp<IMemory> &data) {
     ALOGV("dataCallbackTimestamp");
     mSkipCurrentFrame = skipFrameAndModifyTimeStamp(&timestampUs);
+    // psw0523 patch
+#if 0
     CameraSource::dataCallbackTimestamp(timestampUs, msgType, data);
+#else
+    CameraSource::dataCallbackTimestampTimelapse(timestampUs, msgType, data);
+#endif
 }
 
 }  // namespace android

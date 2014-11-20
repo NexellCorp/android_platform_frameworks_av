@@ -8,7 +8,7 @@ LOCAL_SRC_FILES:=                     \
 LOCAL_C_INCLUDES := \
 		$(TOP)/system/core/include \
 		$(TOP)/hardware/libhardware/include \
-		$(TOP)/hardware/nexell/pyrope/include \
+		$(TOP)/hardware/samsung_slsi/slsiap/include \
         $(TOP)/frameworks/native/include/media/openmax \
         $(TOP)/hardware/msm7k
 

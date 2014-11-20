@@ -14,7 +14,6 @@
  * limitations under the License.
  *
  * Modified by Ray Park <ray@nexell.co.kr>
- *  - Migration ICS to Jelly Bean for NXP4330
  */
 
 #ifndef SUPER_EXTRACTOR_H_

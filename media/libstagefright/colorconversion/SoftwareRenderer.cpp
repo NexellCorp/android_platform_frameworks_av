@@ -138,7 +138,7 @@ static int ALIGN(int x, int y) {
 }
 
 
-#define NXP4330_PRIVATE 0
+#define S5P4418_PRIVATE 0
 
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -173,7 +173,7 @@ void SoftwareRenderer::render(
                 0, 0, mCropWidth - 1, mCropHeight - 1);
         CHECK_EQ(0, mapper.unlock(buf->handle));
     } else if (mColorFormat == OMX_COLOR_FormatYUV420Planar) {
-#if NXP4330_PRIVATE
+#if S5P4418_PRIVATE
         struct private_handle_t const *hPrivate = (struct private_handle_t const *)buf->handle;
         if( hPrivate )
         {

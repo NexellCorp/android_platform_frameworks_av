@@ -33,6 +33,11 @@
 
 #include "matroska/MatroskaExtractor.h"
 
+//	Added by Ray Park
+#ifdef ENABLE_FFMPEG_EXTRACTOR
+#include <FFmpegExtractor.h>
+#endif
+
 #include <media/IMediaHTTPConnection.h>
 #include <media/IMediaHTTPService.h>
 #include <media/stagefright/foundation/ADebug.h>
@@ -160,6 +165,10 @@ void DataSource::RegisterDefaultSniffers() {
     if (gSniffersRegistered) {
         return;
     }
+
+#ifdef ENABLE_FFMPEG_EXTRACTOR
+	RegisterSniffer_l(SniffFFMPEG);
+#endif
 
     RegisterSniffer_l(SniffMPEG4);
     RegisterSniffer_l(SniffMatroska);

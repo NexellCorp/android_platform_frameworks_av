@@ -61,6 +61,7 @@ sp<MediaExtractor> MediaExtractor::Create(
     String8 tmp;
     float confidence;
     if (mime == NULL) {
+        //float confidence;
         if (!source->sniff(&tmp, &confidence, &meta)) {
             ALOGV("FAILED to autodetect media content.");
 
@@ -143,9 +144,9 @@ sp<MediaExtractor> MediaExtractor::Create(
         ret = new FFmpegExtractor(source);
     }else if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_MPEG2TS)) {
         ret = new FFmpegExtractor(source);
-    } else if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_MPEG2PS)) {
-        ret = new FFmpegExtractor(source);
 #endif
+    } else if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_MPEG2PS)) {
+        ret = new MPEG2PSExtractor(source);
     }
 
     if (ret != NULL) {

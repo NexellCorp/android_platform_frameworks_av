@@ -683,6 +683,12 @@ status_t OMXCodec::configureCodec(const sp<MetaData> &meta) {
         setAMRFormat(true /* isWAMR */, bitRate);
     }
  #if 1   // Added by Ray Park
+    else if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_AC3, mMIME) && !strncmp(mComponentName, "OMX.NX.",7)) {
+        CHECK(meta->findInt32(kKeyChannelCount, &numChannels));
+        CHECK(meta->findInt32(kKeySampleRate, &sampleRate));
+        meta->findInt32(kKeyBitRate, &bitRate);
+        setAC3Format(numChannels, sampleRate);
+    }
 	else if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_DTS, mMIME)) {
 		CHECK(meta->findInt32(kKeyChannelCount, &numChannels));
 		CHECK(meta->findInt32(kKeySampleRate, &sampleRate));
@@ -711,18 +717,7 @@ status_t OMXCodec::configureCodec(const sp<MetaData> &meta) {
         meta->findInt32(kKeyWMAVersion, &version);
         setWMAFormat(numChannels, sampleRate, blockAlign, bitRate, version);
      }
-    else if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_WMA, mMIME)) {
-        int32_t blockAlign, version = 0;
-        CHECK(meta->findInt32(kKeyChannelCount, &numChannels));
-        CHECK(meta->findInt32(kKeySampleRate, &sampleRate));
-        CHECK(meta->findInt32(kKeyBitRate, &bitRate));
-        CHECK(meta->findInt32(kKeyBlockAlign, &blockAlign));
-        meta->findInt32(kKeyWMAVersion, &version);
-        setWMAFormat(numChannels, sampleRate, blockAlign, bitRate, version);
-     }
-
 #if 1
-
     else if ( !strncmp(mComponentName, "OMX.NX.AUDIO_DECODER", 20) && !strcasecmp(MEDIA_MIMETYPE_AUDIO_MPEG, mMIME) ) {
         int32_t version = 0;
         if( !meta->findInt32(kKeyMpegAudioLayer, &version ) )
@@ -739,9 +734,7 @@ status_t OMXCodec::configureCodec(const sp<MetaData> &meta) {
         CHECK(meta->findInt32(kKeySampleRate, &sampleRate));
         setMPGAuidoFormat(numChannels, sampleRate);
      }
-
 #else
-
 #if 0   //  Use MP3 Decoding to FFMPEG Audio Decoder ( Can Support Layer 1,2,3 )
     else if ( !strncmp(mComponentName, "OMX.NX.AUDIO_DECODER", 20) && !strcasecmp(MEDIA_MIMETYPE_AUDIO_MPEG, mMIME) ) {
         int32_t version = 0;
@@ -762,8 +755,6 @@ status_t OMXCodec::configureCodec(const sp<MetaData> &meta) {
         setMPGAuidoFormat(numChannels, sampleRate);
      }
 #endif
-
-
 #endif
 
 #endif
@@ -3709,8 +3700,13 @@ static OMX_AUDIO_AMRBANDMODETYPE pickModeFromBitRate(bool isAMRWB, int32_t bps) 
 }
 
 #if 1   // Added by  2013_07_18
-#define OMX_IndexParamAudioDTS  (OMX_IndexVendorStartUnused + 0x01)		//  Define DTS Parameters
-#define OMX_IndexParamAudioFLAC (OMX_IndexVendorStartUnused + 0x02)		//  Define FLAC Parameters
+#define OMX_IndexParamAudioAc3  (OMX_IndexVendorStartUnused + 0xE0000 + 0x00)
+#define OMX_IndexParamAudioDTS  (OMX_IndexVendorStartUnused + 0xE0000 + 0x01)
+#define OMX_IndexParamAudioFLAC (OMX_IndexVendorStartUnused + 0xE0000 + 0x02)
+
+#define OMX_AUDIO_CodingAC3     (OMX_AUDIO_CodingVendorStartUnused + 0xE0000 + 0x00)
+#define OMX_AUDIO_CodingDTS     (OMX_AUDIO_CodingVendorStartUnused + 0xE0000 + 0x01)
+#define OMX_AUDIO_CodingFLAC    (OMX_AUDIO_CodingVendorStartUnused + 0xE0000 + 0x02)
 
 typedef struct OMX_AUDIO_PARAM_AC3TYPE{
 	OMX_U32 nSize;

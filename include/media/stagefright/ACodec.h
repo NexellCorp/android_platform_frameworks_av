@@ -287,6 +287,7 @@ private:
     status_t setupFLACCodecNexell(bool encoder, int32_t numChannels, int32_t sampleRate);
     status_t setupRACodecNexell(bool encoder, int32_t numChannels, int32_t sampleRate, int32_t bitsPerFrame, int32_t bitRate);
     status_t setupWMACodecNexell(bool encoder, int32_t numChannels, int32_t sampleRate, int32_t blockAlign, int32_t bitRate, int32_t version);
+    status_t setMPGAuidoFormatNexell(bool encoder, int32_t numChannels, int32_t sampleRate);
 #endif
 
     status_t selectAudioPortFormat(

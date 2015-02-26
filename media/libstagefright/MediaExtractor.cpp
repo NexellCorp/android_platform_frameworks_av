@@ -128,25 +128,26 @@ sp<MediaExtractor> MediaExtractor::Create(
         ret = new WAVExtractor(source);
     } else if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_OGG)) {
         ret = new OggExtractor(source);
-    } else if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_MATROSKA) && confidence>0.59f) {
+    } else if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_MATROSKA) && confidence<0.61f) {
         ret = new MatroskaExtractor(source);
-    } else if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_MPEG2TS)) {
-        ret = new MPEG2TSExtractor(source);
     } else if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_WVM)) {
         // Return now.  WVExtractor should not have the DrmFlag set in the block below.
         return new WVMExtractor(source);
     } else if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_AAC_ADTS)) {
         ret = new AACExtractor(source, meta);
-    } else if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_MPEG2PS)&&confidence>0.24f) {
-        ret = new MPEG2PSExtractor(source);
 #ifdef ENABLE_FFMPEG_EXTRACTOR   //  Added by Ray Park for FFMPEG Extractor 
     }else if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_MATROSKA)) {
         ret = new FFmpegExtractor(source);
     }else if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_MPEG2TS)) {
         ret = new FFmpegExtractor(source);
-#endif
     } else if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_MPEG2PS)) {
+        ret = new FFmpegExtractor(source);
+#else
+    } else if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_MPEG2PS)&&confidence>0.24f) {
         ret = new MPEG2PSExtractor(source);
+    } else if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_MPEG2TS)) {
+        ret = new MPEG2TSExtractor(source);
+#endif
     }
 
     if (ret != NULL) {

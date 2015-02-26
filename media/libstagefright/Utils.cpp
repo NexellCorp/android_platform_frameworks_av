@@ -111,18 +111,14 @@ status_t convertMetaDataToMessage(
     {
         msg->setInt32( "ffmpeg-wma-version", wmaVersion );
     }
-#endif
 
+    int32_t wmvVersion;
+    if( meta->findInt32(kKeyWMVVersion, &wmvVersion ) )
+    {
+        msg->setInt32( "ffmpeg-wmv-version", wmvVersion );
+    }
 
-    if (!strncasecmp("video/", mime, 6)) {
-        int32_t width, height;
-        CHECK(meta->findInt32(kKeyWidth, &width));
-        CHECK(meta->findInt32(kKeyHeight, &height));
-
-        msg->setInt32("width", width);
-        msg->setInt32("height", height);
-
-#if 1   // added by Ray Park 20150205 for FFMPEG Extractor
+    {
         int32_t codecTag;
         if( meta->findInt32(kKeyFFCodecTag, &codecTag ) )
         {
@@ -136,20 +132,25 @@ status_t convertMetaDataToMessage(
         {
             if( size > 0 )
             {
-                sp<ABuffer> buffer = new ABuffer(1024);
+                sp<ABuffer> buffer = new ABuffer(64*1024);
                 buffer->setRange(0, 0);
                 memcpy( buffer->data() + buffer->size() , data, size );
                 buffer->setRange(0, buffer->size() + size);
                 msg->setBuffer( "ffmpeg-extra-data", buffer );
             }
         }
-
-        int32_t wmvVersion;
-        if( meta->findInt32(kKeyWMVVersion, &wmvVersion ) )
-        {
-            msg->setInt32( "ffmpeg-wmv-version", wmvVersion );
-        }
+    }
 #endif
+
+
+    if (!strncasecmp("video/", mime, 6)) {
+        int32_t width, height;
+        CHECK(meta->findInt32(kKeyWidth, &width));
+        CHECK(meta->findInt32(kKeyHeight, &height));
+
+        msg->setInt32("width", width);
+        msg->setInt32("height", height);
+
 
         int32_t sarWidth, sarHeight;
         if (meta->findInt32(kKeySARWidth, &sarWidth)

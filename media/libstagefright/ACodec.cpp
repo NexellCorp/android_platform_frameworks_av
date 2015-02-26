@@ -1518,11 +1518,25 @@ status_t ACodec::configureCodec(
         int32_t sampleRate;
         int32_t bitsPerSample=0;
         int32_t bitRate=0;
+        int32_t blockAlign=0;
         CHECK(msg->findInt32("channel-count", &numChannels));
         CHECK(msg->findInt32("sample-rate", &sampleRate));
+        msg->findInt32("block-align", &blockAlign);
         msg->findInt32("bit-per-sample", &bitsPerSample);
         msg->findInt32("bit-rate", &bitRate);
-        setupRACodecNexell(encoder, numChannels, sampleRate, bitsPerSample, bitRate);
+        setupRACodecNexell(encoder, numChannels, sampleRate, blockAlign, bitRate);
+    } else if ( !strcasecmp(MEDIA_MIMETYPE_AUDIO_MPEG_LAYER_I, mime) ) {
+        int32_t numChannels;
+        int32_t sampleRate;
+        CHECK(msg->findInt32("channel-count", &numChannels));
+        CHECK(msg->findInt32("sample-rate", &sampleRate));
+        setMPGAuidoFormatNexell(encoder, numChannels, sampleRate);
+    } else if ( !strcasecmp(MEDIA_MIMETYPE_AUDIO_MPEG_LAYER_II, mime) ) {
+        int32_t numChannels;
+        int32_t sampleRate;
+        CHECK(msg->findInt32("channel-count", &numChannels));
+        CHECK(msg->findInt32("sample-rate", &sampleRate));
+        setMPGAuidoFormatNexell(encoder, numChannels, sampleRate);
 #else
     } else if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_FLAC)) {
         int32_t numChannels, sampleRate, compressionLevel = -1;
@@ -1594,52 +1608,82 @@ status_t ACodec::configureCodec(
         sp<ABuffer> buffer;
         if( msg->findBuffer("ffmpeg-extra-data", &buffer) )
         {
-
-            if( buffer->size() > 0 )
+            if( buffer->size() > 0 &&  !strncmp(mComponentName.c_str(), "OMX.NX.VIDEO", 12))
             {
-                if(!strncmp(mComponentName.c_str(), "OMX.NX.VIDEO", 12))
-                {
-                    //  Set FFMPEG Extradata
-                    OMX_INDEXTYPE index;
-                    status_t err = mOMX->getExtensionIndex( mNode, "OMX.NX.VIDEO_DECODER.Extradata", &index);
-                    if (err != OK) {
-                        ALOGE("getExtensionIndex('OMX.NX.VIDEO_DECODER.Extradata') returned error 0x%08x", err);
-                    }
-
-                    //  Enable ThumbNailMode
-                    uint8_t *extData = new uint8_t[buffer->size() + 4];
-                    *((int32_t*)extData) = buffer->size();
-                    memcpy( extData+4, buffer->base(), buffer->size() );
-                    err = mOMX->setParameter(mNode, index, extData, buffer->size()+4);
-                    delete []extData;
-
-                    if (err != OK) {
-                        ALOGE("setParameter('OMX.NX.VIDEO_DECODER.Extradata') returned error 0x%08x", err);
-                    }
+                //  Set FFMPEG Extradata
+                OMX_INDEXTYPE index;
+                status_t err = mOMX->getExtensionIndex( mNode, "OMX.NX.VIDEO_DECODER.Extradata", &index);
+                if (err != OK) {
+                    ALOGE("getExtensionIndex('OMX.NX.VIDEO_DECODER.Extradata') returned error 0x%08x", err);
                 }
-                else if ( !strncmp(mComponentName.c_str(), "OMX.NX.AUDIO_DECODER.FFMPEG", 27 ) )
-                {
-                    //  Set FFMPEG Extradata
-                    OMX_INDEXTYPE index;
-                    status_t err = mOMX->getExtensionIndex( mNode, "OMX.NX.AUDIO_DECODER.FFMPEG.Extradata", &index);
-                    if (err != OK) {
-                        ALOGE("getExtensionIndex('OMX.NX.AUDIO_DECODER.FFMPEG.Extradata') returned error 0x%08x", err);
-                    }
 
-                    uint8_t *extData = new uint8_t[buffer->size() + 4];
-                    *((int32_t*)extData) = buffer->size();
-                    memcpy( extData+4, buffer->base(), buffer->size() );
-                    err = mOMX->setParameter(mNode, index, extData, buffer->size()+4);
-                    delete []extData;
+                //  Enable ThumbNailMode
+                uint8_t *extData = new uint8_t[buffer->size() + 4];
+                *((int32_t*)extData) = buffer->size();
+                memcpy( extData+4, buffer->base(), buffer->size() );
+                err = mOMX->setParameter(mNode, index, extData, buffer->size()+4);
+                delete []extData;
 
-                    if (err != OK) {
-                        ALOGE("setParameter('OMX.NX.AUDIO_DECODER.FFMPEG.Extradata') returned error 0x%08x", err);
-                    }
+                if (err != OK) {
+                    ALOGE("setParameter('OMX.NX.VIDEO_DECODER.Extradata') returned error 0x%08x", err);
                 }
             }
+        }
 
+        int32_t wmvVersion;
+        if (msg->findInt32("ffmpeg-wmv-version", &wmvVersion))
+        {
+            OMX_VIDEO_PARAM_WMVTYPE profile;
+            memset(&profile, 0, sizeof(profile));
 
+            switch( wmvVersion )
+            {
+#if 0
+                case kTypeWMVVer_7:
+                    profile.eFormat = OMX_VIDEO_WMVFormat7;
+                    break;
+                case kTypeWMVVer_8:
+                    profile.eFormat = OMX_VIDEO_WMVFormat8;
+                    break;
+#endif
+                case 'wmv9':// kTypeWMVVer_9
+                    profile.eFormat = OMX_VIDEO_WMVFormat9;
+                    break;
+                default:
+                    profile.eFormat = (OMX_VIDEO_WMVFORMATTYPE)0;   //  VC1
+                    break;
+            }
+            mOMX->setParameter( mNode, OMX_IndexParamVideoWmv, &profile, sizeof(profile) );
+        }
 
+    }
+    else if( !strncmp(mComponentName.c_str(), "OMX.NX.AUDIO_DECODER.FFMPEG", 27 ) )
+    {
+        sp<ABuffer> buffer;
+        if( msg->findBuffer("ffmpeg-extra-data", &buffer) )
+        {
+            if(  buffer->size() > 0 )
+            {
+                //  Set FFMPEG Extradata
+                OMX_INDEXTYPE index;
+                status_t err = mOMX->getExtensionIndex( mNode, "OMX.NX.AUDIO_DECODER.FFMPEG.Extradata", &index);
+                if (err != OK) {
+                    ALOGE("getExtensionIndex('OMX.NX.AUDIO_DECODER.FFMPEG.Extradata') returned error 0x%08x", err);
+                }
+
+                uint8_t *extData = new uint8_t[buffer->size() + 4];
+                *((int32_t*)extData) = buffer->size();
+                memcpy( extData+4, buffer->base(), buffer->size() );
+                ALOGD("==========================================================<<<<<< Ray(%d, size = %d)", __LINE__, buffer->size());
+                hexdump(extData, buffer->size()+4);
+                ALOGD("==========================================================<<<<<< Ray(%d, size = %d)", __LINE__, buffer->size());
+                err = mOMX->setParameter(mNode, index, extData, buffer->size()+4);
+                delete []extData;
+
+                if (err != OK) {
+                    ALOGE("setParameter('OMX.NX.AUDIO_DECODER.FFMPEG.Extradata') returned error 0x%08x", err);
+                }
+            }
         }
     }
 #endif
@@ -2131,9 +2175,10 @@ status_t ACodec::setupWMACodecNexell(bool encoder, int32_t numChannels, int32_t 
 
 }
 
-status_t ACodec::setupRACodecNexell(bool encoder, int32_t numChannels, int32_t sampleRate, int32_t bitsPerFrame, int32_t bitRate)
+status_t ACodec::setupRACodecNexell(bool encoder, int32_t numChannels, int32_t sampleRate, int32_t bitsPerSamp, int32_t bitRate)
 {
     status_t err = setupRawAudioFormat( encoder ? kPortIndexInput : kPortIndexOutput, sampleRate, numChannels);
+    ALOGD("setupRACodecNexell() setupRawAudioFormat() return (%d)", err);
     if (err != OK) {
         return err;
     }
@@ -2144,7 +2189,7 @@ status_t ACodec::setupRACodecNexell(bool encoder, int32_t numChannels, int32_t s
     }
 
     OMX_AUDIO_PARAM_RATYPE def;
-    def.nSize = sizeof(OMX_AUDIO_PARAM_DTSTYPE);
+    def.nSize = sizeof(OMX_AUDIO_PARAM_RATYPE);
     def.nVersion.s.nVersionMajor = 1;
     def.nVersion.s.nVersionMinor = 0;
     def.nVersion.s.nRevision = 0;
@@ -2163,10 +2208,53 @@ status_t ACodec::setupRACodecNexell(bool encoder, int32_t numChannels, int32_t s
 
     def.nChannels = numChannels;
     def.nSamplingRate = sampleRate;
-    def.nBitsPerFrame = bitRate;
+    def.nBitsPerFrame = bitsPerSamp;
+
     return mOMX->setParameter(
             mNode,
-            (OMX_INDEXTYPE)OMX_IndexParamAudioDTS,
+            (OMX_INDEXTYPE)OMX_IndexParamAudioRa,
+            &def,
+            sizeof(def));
+}
+
+
+status_t ACodec::setMPGAuidoFormatNexell(bool encoder, int32_t numChannels, int32_t sampleRate)
+{
+    status_t err = setupRawAudioFormat( encoder ? kPortIndexInput : kPortIndexOutput, sampleRate, numChannels);
+    ALOGD("setMPGAuidoFormatNexell() setupRawAudioFormat() return (%d)", err);
+    if (err != OK) {
+        return err;
+    }
+
+    if (encoder) {
+        ALOGW("RA encoding is not supported.");
+        return INVALID_OPERATION;
+    }
+
+    OMX_AUDIO_PARAM_MP3TYPE def;
+    def.nSize = sizeof(OMX_AUDIO_PARAM_MP3TYPE);
+    def.nVersion.s.nVersionMajor = 1;
+    def.nVersion.s.nVersionMinor = 0;
+    def.nVersion.s.nRevision = 0;
+    def.nVersion.s.nStep = 0;
+
+    def.nPortIndex = kPortIndexInput;
+    err = mOMX->getParameter(
+            mNode,
+            (OMX_INDEXTYPE)OMX_IndexParamAudioMp3,
+            &def,
+            sizeof(def));
+
+    if (err != OK) {
+        return err;
+    }
+
+    def.nChannels = numChannels;
+    def.nSampleRate = sampleRate;
+
+    return mOMX->setParameter(
+            mNode,
+            (OMX_INDEXTYPE)OMX_IndexParamAudioMp3,
             &def,
             sizeof(def));
 }

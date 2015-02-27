@@ -216,7 +216,7 @@ static VideoFrame *extractVideoFrameWithCodecFlags(
     if (err != OK) {
         CHECK(buffer == NULL);
 
-        ALOGV("decoding frame failed.");
+        ALOGV("decoding frame failed.(err = %d\n)", err);
         decoder->stop();
 
         return NULL;
@@ -389,6 +389,20 @@ VideoFrame *StagefrightMetadataRetriever::getFrameAtTime(
         mAlbumArt = MediaAlbumArt::fromData(dataSize, data);
     }
 
+#if 1   //  Modified by Ray Park : Change Thumbnail Find Order From "S/W Codec --> H/W Codec" to "H/W Codec --> S/W Codec"
+    VideoFrame *frame =
+        extractVideoFrameWithCodecFlags(
+                &mClient, trackMeta, source, 0,
+                timeUs, option);
+
+    if (frame == NULL) {
+        ALOGV("Hardware decoder failed to extract thumbnail, "
+             "trying software decoder.");
+
+        frame = extractVideoFrameWithCodecFlags(&mClient, trackMeta, source, OMXCodec::kPreferSoftwareCodecs,
+                        timeUs, option);
+    }
+#else
     VideoFrame *frame =
         extractVideoFrameWithCodecFlags(
                 &mClient, trackMeta, source, OMXCodec::kPreferSoftwareCodecs,
@@ -401,6 +415,7 @@ VideoFrame *StagefrightMetadataRetriever::getFrameAtTime(
         frame = extractVideoFrameWithCodecFlags(&mClient, trackMeta, source, 0,
                         timeUs, option);
     }
+#endif
 
     return frame;
 }

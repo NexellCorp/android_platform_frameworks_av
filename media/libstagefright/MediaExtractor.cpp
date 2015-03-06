@@ -123,8 +123,8 @@ sp<MediaExtractor> MediaExtractor::Create(
         ret = new FFmpegExtractor(source);
     }else if ( !strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_ASF) ){
         ret = new FFmpegExtractor(source);
-    }else if ( !strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_MOV) ){
-        ret = new FFmpegExtractor(source);
+    // }else if ( !strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_MOV) ){
+    //     ret = new FFmpegExtractor(source);
 #endif
     } else if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_MPEG)) {
         ret = new MP3Extractor(source, meta);

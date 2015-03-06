@@ -4036,7 +4036,7 @@ status_t ACodec::getPortFormat(OMX_U32 portIndex, sp<AMessage> &notify) {
 
                 case OMX_AUDIO_CodingWMA:    //   Nexell WMA
                 {
-                    OMX_AUDIO_PARAM_AC3TYPE params;
+                    OMX_AUDIO_PARAM_WMATYPE params;
                     InitOMXParams(&params);
                     params.nPortIndex = portIndex;
                     CHECK_EQ((status_t)OK, mOMX->getParameter(
@@ -4046,13 +4046,13 @@ status_t ACodec::getPortFormat(OMX_U32 portIndex, sp<AMessage> &notify) {
                             sizeof(params)));
                     notify->setString("mime", MEDIA_MIMETYPE_AUDIO_WMA);
                     notify->setInt32("channel-count", params.nChannels);
-                    notify->setInt32("sample-rate", params.nSampleRate);
+                    notify->setInt32("sample-rate", params.nSamplingRate);
                     break;
                 }
 
                 case OMX_AUDIO_CodingRA:    //   Nexell RA
                 {
-                    OMX_AUDIO_PARAM_AC3TYPE params;
+                    OMX_AUDIO_PARAM_RATYPE params;
                     InitOMXParams(&params);
                     params.nPortIndex = portIndex;
                     CHECK_EQ((status_t)OK, mOMX->getParameter(
@@ -4062,7 +4062,7 @@ status_t ACodec::getPortFormat(OMX_U32 portIndex, sp<AMessage> &notify) {
                             sizeof(params)));
                     notify->setString("mime", MEDIA_MIMETYPE_AUDIO_RA);
                     notify->setInt32("channel-count", params.nChannels);
-                    notify->setInt32("sample-rate", params.nSampleRate);
+                    notify->setInt32("sample-rate", params.nSamplingRate);
                     break;
                 }
 

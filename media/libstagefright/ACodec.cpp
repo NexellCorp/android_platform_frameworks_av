@@ -1537,6 +1537,15 @@ status_t ACodec::configureCodec(
         CHECK(msg->findInt32("channel-count", &numChannels));
         CHECK(msg->findInt32("sample-rate", &sampleRate));
         setMPGAuidoFormatNexell(encoder, numChannels, sampleRate);
+    } else if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_RAW)) {
+        int32_t numChannels, sampleRate;
+        if (encoder
+                || !msg->findInt32("channel-count", &numChannels)
+                || !msg->findInt32("sample-rate", &sampleRate)) {
+            err = INVALID_OPERATION;
+        } else {
+            err = setupRawAudioFormat(kPortIndexInput, sampleRate, numChannels);
+        }
 #else
     } else if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_FLAC)) {
         int32_t numChannels, sampleRate, compressionLevel = -1;

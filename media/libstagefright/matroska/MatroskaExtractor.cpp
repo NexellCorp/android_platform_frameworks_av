@@ -413,16 +413,16 @@ void BlockIterator::seek(
 
     const mkvparser::CuePoint* pCP;
     mkvparser::Tracks const *pTracks = pSegment->GetTracks();
-    unsigned long int trackCount = pTracks->GetTracksCount();
     while (!pCues->DoneParsing()) {
         pCues->LoadCuePoint();
         pCP = pCues->GetLast();
         CHECK(pCP);
 
+        size_t trackCount = mExtractor->mTracks.size();
         for (size_t index = 0; index < trackCount; ++index) {
-            const mkvparser::Track *pTrack = pTracks->GetTrackByIndex(index);
+            MatroskaExtractor::TrackInfo& track = mExtractor->mTracks.editItemAt(index);
+            const mkvparser::Track *pTrack = pTracks->GetTrackByNumber(track.mTrackNum);
             if (pTrack && pTrack->GetType() == 1 && pCP->Find(pTrack)) { // VIDEO_TRACK
-                MatroskaExtractor::TrackInfo& track = mExtractor->mTracks.editItemAt(index);
                 track.mCuePoints.push_back(pCP);
             }
         }
@@ -434,12 +434,13 @@ void BlockIterator::seek(
     }
 
     const mkvparser::CuePoint::TrackPosition *pTP = NULL;
-    const mkvparser::Track *thisTrack = pTracks->GetTrackByIndex(mIndex);
+    const mkvparser::Track *thisTrack = pTracks->GetTrackByNumber(mTrackNum);
     if (thisTrack->GetType() == 1) { // video
         MatroskaExtractor::TrackInfo& track = mExtractor->mTracks.editItemAt(mIndex);
         pTP = track.find(seekTimeNs);
     } else {
         // The Cue index is built around video keyframes
+        unsigned long int trackCount = pTracks->GetTracksCount();
         for (size_t index = 0; index < trackCount; ++index) {
             const mkvparser::Track *pTrack = pTracks->GetTrackByIndex(index);
             if (pTrack && pTrack->GetType() == 1 && pCues->Find(seekTimeNs, pTrack, pCP, pTP)) {
@@ -965,25 +966,6 @@ void MatroskaExtractor::addTracks() {
                                 codecID);
                         continue;
                     }
-#if 1	//	Added by Ray Park for XVID
-                } else if (!strcmp("V_MS/VFW/FOURCC", codecID)) {
-                    if (codecPrivateSize >= 40) {
-                        uint32_t fourcc;
-                        memcpy(&fourcc, codecPrivate+16, 4);
-                        if( fourcc != 0x44495658)   //  "XVID"
-                        {
-                            ALOGW("%s is detected, but does not support fourcc 0x%x.",
-                                    codecID, fourcc);
-                            continue;
-                        }
-                        meta->setCString(
-                                kKeyMIMEType, MEDIA_MIMETYPE_VIDEO_MPEG4);
-                    }else{
-                        ALOGW("%s is detected, but too short codecPrivate data.",
-                                codecID);
-                        continue;
-                    }
-#endif
                 } else if (!strcmp("V_VP8", codecID)) {
                     meta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_VIDEO_VP8);
                 } else if (!strcmp("V_VP9", codecID)) {
@@ -1022,16 +1004,6 @@ void MatroskaExtractor::addTracks() {
                     mSeekPreRollNs = track->GetSeekPreRoll();
                 } else if (!strcmp("A_MPEG/L3", codecID)) {
                     meta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_AUDIO_MPEG);
-
-#if 1   //  Added by Ray Park Support AC3 & FLAC Container
-                } else if (!strcmp("A_AC3", codecID)) {
-                    meta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_AUDIO_AC3);
-                } else if (!strcmp("A_FLAC", codecID)) {
-                    meta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_AUDIO_FLAC);
-                } else if (!strcmp("A_DTS", codecID)) {
-                    meta->setCString(kKeyMIMEType, MEDIA_MIMETYPE_AUDIO_DTS);
-#endif
-
                 } else {
                     ALOGW("%s is not supported.", codecID);
                     continue;

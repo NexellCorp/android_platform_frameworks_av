@@ -74,18 +74,13 @@ class StreamingProcessor:
 
     status_t stopStream();
 
-#ifdef PATCH_FOR_PYROPE
-    status_t deletePreviewStreamNoLocked();
-    status_t deleteRecordingStreamLocked();
-#endif
-
     // Returns the request ID for the currently streaming request
     // Returns 0 if there is no active request.
     status_t getActiveRequestId() const;
     status_t incrementStreamingIds();
 
     // Callback for new recording frames from HAL
-    virtual void onFrameAvailable();
+    virtual void onFrameAvailable(const BufferItem& item);
     // Callback from stagefright which returns used recording frames
     void releaseRecordingFrame(const sp<IMemory>& mem);
 

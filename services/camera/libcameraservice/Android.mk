@@ -75,11 +75,6 @@ LOCAL_C_INCLUDES += \
 
 LOCAL_CFLAGS += -Wall -Wextra
 
-# psw0523 add for slsiap
-ifeq ($(TARGET_BOARD_PLATFORM), slsiap)
-	LOCAL_CFLAGS += -DPATCH_FOR_PYROPE
-endif
-
 LOCAL_MODULE:= libcameraservice
 
 include $(BUILD_SHARED_LIBRARY)

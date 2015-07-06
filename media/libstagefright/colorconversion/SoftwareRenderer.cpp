@@ -104,6 +104,7 @@ void SoftwareRenderer::resetFormatIfChanged(const sp<AMessage> &format) {
     switch (mColorFormat) {
         case OMX_COLOR_FormatYUV420Planar:
         case OMX_TI_COLOR_FormatYUV420PackedSemiPlanar:
+        case OMX_COLOR_FormatYUV420SemiPlanar:
         {
             if (!runningInEmulator()) {
                 halFormat = HAL_PIXEL_FORMAT_YV12;
@@ -214,14 +215,12 @@ void SoftwareRenderer::render(
         const uint8_t *src_v = src_u + (mWidth / 2 * mHeight / 2);
 
         uint8_t *dst_y = (uint8_t *)dst;
-#if 1	// Modified By Ray Park
-        uint32_t dst_height_stride = ALIGN(buf->height, 16);
-        size_t dst_y_size = buf->stride * dst_height_stride;
-        size_t dst_c_stride = ALIGN(buf->stride>>1,16);
-        size_t dst_c_size = dst_c_stride * ALIGN(dst_height_stride>>1,16);
-        uint8_t *dst_u = dst_y + dst_y_size;
-        uint8_t *dst_v = dst_u + dst_c_size;
-#endif
+        size_t dst_y_size = buf->stride * buf->height;
+        size_t dst_c_stride = ALIGN(buf->stride / 2, 16);
+        size_t dst_c_size = dst_c_stride * buf->height / 2;
+        uint8_t *dst_v = dst_y + dst_y_size;
+        uint8_t *dst_u = dst_v + dst_c_size;
+
         for (int y = 0; y < mCropHeight; ++y) {
             memcpy(dst_y, src_y, mCropWidth);
 
@@ -238,9 +237,8 @@ void SoftwareRenderer::render(
             dst_u += dst_c_stride;
             dst_v += dst_c_stride;
         }
-    } else {
-        CHECK_EQ(mColorFormat, OMX_TI_COLOR_FormatYUV420PackedSemiPlanar);
-
+    } else if (mColorFormat == OMX_TI_COLOR_FormatYUV420PackedSemiPlanar
+            || mColorFormat == OMX_COLOR_FormatYUV420SemiPlanar) {
         const uint8_t *src_y =
             (const uint8_t *)data;
 
@@ -273,6 +271,8 @@ void SoftwareRenderer::render(
             dst_u += dst_c_stride;
             dst_v += dst_c_stride;
         }
+    } else {
+        LOG_ALWAYS_FATAL("bad color format %#x", mColorFormat);
     }
 
     CHECK_EQ(0, mapper.unlock(buf->handle));

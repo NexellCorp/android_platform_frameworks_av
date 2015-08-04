@@ -125,8 +125,7 @@ FFMPEG_PATH 	:= $(TOP)/hardware/samsung_slsi/slsiap/omx/codec/ffmpeg
 LOCAL_CPPFLAGS	+= -DENABLE_FFMPEG_EXTRACTOR=1
 LOCAL_CFLAGS	+= -D__STDC_CONSTANT_MACROS=1 -D__STDINT_LIMITS=1
 LOCAL_C_INCLUDES += $(FFMPEG_PATH)/include \
-		$(TOP)/hardware/samsung_slsi/slsiap/omx/extractor/ffmpeg \
-		$(LOCAL_PATH)/ffmpegExtractor
+		$(TOP)/hardware/samsung_slsi/slsiap/omx/extractor/ffmpeg 
 
 #LOCAL_LDFLAGS += \
 #	-L$(LOCAL_PATH)/ffmpegExtractor -lNX_FFMpegExtractor

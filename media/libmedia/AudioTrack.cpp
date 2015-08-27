@@ -2109,6 +2109,11 @@ void AudioTrack::setAttributesFromStreamType(audio_stream_type_t streamType) {
         mAttributes.content_type = AUDIO_CONTENT_TYPE_SPEECH;
         mAttributes.usage = AUDIO_USAGE_ASSISTANCE_ACCESSIBILITY;
         break;
+	case AUDIO_STREAM_EXT_SPEAKER:
+		mAttributes.content_type = AUDIO_CONTENT_TYPE_MUSIC;
+		mAttributes.usage = AUDIO_USAGE_EXT_SPEAKER;
+		break;
+
     default:
         ALOGE("invalid stream type %d when converting to attributes", streamType);
     }
@@ -2165,6 +2170,9 @@ void AudioTrack::setStreamTypeFromAttributes(audio_attributes_t& aa) {
     case AUDIO_USAGE_NOTIFICATION_EVENT:
         mStreamType = AUDIO_STREAM_NOTIFICATION;
         return;
+	case AUDIO_USAGE_EXT_SPEAKER:
+		mStreamType = AUDIO_STREAM_EXT_SPEAKER;
+		return;
 
     case AUDIO_USAGE_UNKNOWN:
     default:
@@ -2195,6 +2203,7 @@ bool AudioTrack::isValidAttributes(const audio_attributes_t *paa) {
     case AUDIO_USAGE_ASSISTANCE_NAVIGATION_GUIDANCE:
     case AUDIO_USAGE_ASSISTANCE_SONIFICATION:
     case AUDIO_USAGE_GAME:
+	case AUDIO_USAGE_EXT_SPEAKER:
         break;
     default:
         return false;

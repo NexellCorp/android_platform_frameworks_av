@@ -47,6 +47,11 @@
 #include "AudioPolicyManager.h"
 #include "audio_policy_conf.h"
 
+#ifdef ENABLE_DUAL_AUDIO
+#include <NX_IDualAudio.h>
+#endif
+
+
 namespace android {
 
 // ----------------------------------------------------------------------------
@@ -2868,6 +2873,11 @@ AudioPolicyManager::AudioPolicyManager(AudioPolicyClientInterface *clientInterfa
         run(buffer, ANDROID_PRIORITY_AUDIO);
     }
 #endif //AUDIO_POLICY_TEST
+#ifdef ENABLE_DUAL_AUDIO
+	NX_IDualAudio *pDualAudio = GetDualAudioInstance();
+	if( pDualAudio ) pDualAudio->SetConfig( 1, 0, AUDIO_CHANNEL_OUT_STEREO, 48000, AUDIO_FORMAT_PCM_SUB_16_BIT );
+#endif
+
 }
 
 AudioPolicyManager::~AudioPolicyManager()
@@ -2886,6 +2896,11 @@ AudioPolicyManager::~AudioPolicyManager()
    mOutputs.clear();
    mInputs.clear();
    mHwModules.clear();
+
+#ifdef ENABLE_DUAL_AUDIO
+   ReleaseDualAudioInstance();
+#endif
+
 }
 
 status_t AudioPolicyManager::initCheck()
@@ -3912,6 +3927,9 @@ AudioPolicyManager::routing_strategy AudioPolicyManager::getStrategy(
         // while key clicks are played produces a poor result
     case AUDIO_STREAM_TTS:
     case AUDIO_STREAM_MUSIC:
+	#ifdef ENABLE_DUAL_AUDIO
+	case AUDIO_STREAM_EXT_SPEAKER:
+	#endif
         return STRATEGY_MEDIA;
     case AUDIO_STREAM_ENFORCED_AUDIBLE:
         return STRATEGY_ENFORCED_AUDIBLE;
@@ -3931,6 +3949,9 @@ uint32_t AudioPolicyManager::getStrategyForAttr(const audio_attributes_t *attr) 
     case AUDIO_USAGE_ASSISTANCE_ACCESSIBILITY:
     case AUDIO_USAGE_ASSISTANCE_NAVIGATION_GUIDANCE:
     case AUDIO_USAGE_ASSISTANCE_SONIFICATION:
+	#ifdef ENABLE_DUAL_AUDIO
+	case AUDIO_USAGE_EXT_SPEAKER:
+	#endif
         return (uint32_t) STRATEGY_MEDIA;
 
     case AUDIO_USAGE_VOICE_COMMUNICATION:
@@ -4953,6 +4974,15 @@ const AudioPolicyManager::VolumeCurvePoint
         sDefaultMediaVolumeCurve, // DEVICE_CATEGORY_EARPIECE
         sDefaultMediaVolumeCurve  // DEVICE_CATEGORY_EXT_MEDIA
     },
+#ifdef ENABLE_DUAL_AUDIO
+    { // AUDIO_STREAM_EXT_SPEAKER
+		sDefaultMediaVolumeCurve, // DEVICE_CATEGORY_HEADSET
+		sSpeakerMediaVolumeCurve, // DEVICE_CATEGORY_SPEAKER
+		sDefaultMediaVolumeCurve, // DEVICE_CATEGORY_EARPIECE
+		sDefaultMediaVolumeCurve  // DEVICE_CATEGORY_EXT_MEDIA
+	},
+#endif
+
 };
 
 void AudioPolicyManager::initializeVolumeCurves()
@@ -5089,6 +5119,12 @@ status_t AudioPolicyManager::checkAndSetVolume(audio_stream_type_t stream,
             mLastVoiceVolume = voiceVolume;
         }
     }
+#ifdef ENABLE_DUAL_AUDIO
+	if( stream == AUDIO_STREAM_EXT_SPEAKER ) {
+		NX_IDualAudio *pDualAudio = GetDualAudioInstance();
+		if( pDualAudio ) pDualAudio->SetVolume( stream, volume );
+	}
+#endif
 
     return NO_ERROR;
 }
@@ -7228,6 +7264,9 @@ audio_stream_type_t AudioPolicyManager::streamTypefromAttributesInt(const audio_
     case AUDIO_USAGE_GAME:
     case AUDIO_USAGE_ASSISTANCE_ACCESSIBILITY:
     case AUDIO_USAGE_ASSISTANCE_NAVIGATION_GUIDANCE:
+#ifdef ENABLE_DUAL_AUDIO
+	case AUDIO_USAGE_EXT_SPEAKER:
+#endif
         return AUDIO_STREAM_MUSIC;
     case AUDIO_USAGE_ASSISTANCE_SONIFICATION:
         return AUDIO_STREAM_SYSTEM;

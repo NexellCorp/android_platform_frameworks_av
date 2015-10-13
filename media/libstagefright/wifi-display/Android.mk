@@ -3,24 +3,21 @@ LOCAL_PATH:= $(call my-dir)
 include $(CLEAR_VARS)
 
 LOCAL_SRC_FILES:= \
-        MediaReceiver.cpp               \
-        MediaSender.cpp                 \
-        Parameters.cpp                  \
-        rtp/RTPAssembler.cpp            \
-        rtp/RTPReceiver.cpp             \
-        rtp/RTPSender.cpp               \
-        sink/DirectRenderer.cpp         \
-        sink/WifiDisplaySink.cpp        \
-        SNTPClient.cpp                  \
-        TimeSyncer.cpp                  \
-        source/Converter.cpp            \
-        source/MediaPuller.cpp          \
-        source/PlaybackSession.cpp      \
-        source/RepeaterSource.cpp       \
-        source/TSPacketizer.cpp         \
-        source/WifiDisplaySource.cpp    \
-        VideoFormats.cpp                \
-        uibc/getevent.cpp
+	MediaReceiver.cpp               \
+	MediaSender.cpp                 \
+	Parameters.cpp                  \
+	rtp/RTPAssembler.cpp            \
+	rtp/RTPReceiver.cpp             \
+	rtp/RTPSender.cpp               \
+	SNTPClient.cpp                  \
+	TimeSyncer.cpp                  \
+	source/Converter.cpp            \
+	source/MediaPuller.cpp          \
+	source/PlaybackSession.cpp      \
+	source/RepeaterSource.cpp       \
+	source/TSPacketizer.cpp         \
+	source/WifiDisplaySource.cpp    \
+	VideoFormats.cpp                
 
 LOCAL_C_INCLUDES:= \
         $(TOP)/frameworks/av/media/libstagefright \

@@ -44,6 +44,7 @@ namespace android {
 
 // static
 const AString WifiDisplaySource::sUserAgent = MakeUserAgent();
+const int32_t DEFAULT_UIBC_PORT = 7239;
 
 WifiDisplaySource::WifiDisplaySource(
         const sp<ANetworkSession> &netSession,
@@ -53,6 +54,7 @@ WifiDisplaySource::WifiDisplaySource(
       mNetSession(netSession),
       mClient(client),
       mSessionID(0),
+      mUibcSessionID(0),
       mStopReplyID(0),
       mChosenRTPPort(-1),
       mUsingPCMAudio(false),
@@ -107,6 +109,18 @@ status_t WifiDisplaySource::start(const char *iface) {
 
     sp<AMessage> response;
     return PostAndAwaitResponse(msg, &response);
+}
+
+status_t WifiDisplaySource::startUibc(const int32_t port) {
+    status_t err = OK;
+    sp<AMessage> notify = new AMessage(kWhatUIBCNotify, id());
+    ALOGI("source will create uibc channel");
+    err = mNetSession->createTCPDatagramSession(
+            mInterfaceAddr,
+            port,
+            notify,
+            &mUibcSessionID);
+    return err;
 }
 
 status_t WifiDisplaySource::stop() {
@@ -177,6 +191,35 @@ void WifiDisplaySource::onMessageReceived(const sp<AMessage> &msg) {
             sp<AMessage> response = new AMessage;
             response->setInt32("err", err);
             response->postReply(replyID);
+            break;
+        }
+
+        case kWhatStartUibc:
+        {
+            uint32_t replyID;
+            CHECK(msg->senderAwaitsResponse(&replyID));
+
+            int32_t localUibcPort;
+            CHECK(msg->findInt32("port", &localUibcPort));
+            ALOGI("Create listening uibc tcp channel on port %d", localUibcPort);
+
+            status_t err = OK;
+            sp<AMessage> notify = new AMessage(kWhatUIBCNotify, id());
+            err = mNetSession->createTCPDatagramSession(
+                    mInterfaceAddr,
+                    localUibcPort,
+                    notify,
+                    &mUibcSessionID);
+
+            sp<AMessage> response = new AMessage;
+            response->setInt32("err", err);
+            response->postReply(replyID);
+            break;
+        }
+
+        case kWhatUIBCNotify:
+        {
+            ALOGI("get uibc notify");
             break;
         }
 
@@ -586,6 +629,7 @@ status_t WifiDisplaySource::sendM1(int32_t sessionID) {
 status_t WifiDisplaySource::sendM3(int32_t sessionID) {
     AString body =
         "wfd_content_protection\r\n"
+        "wfd_uibc_capability\r\n"
         "wfd_video_formats\r\n"
         "wfd_audio_codecs\r\n"
         "wfd_client_rtp_ports\r\n";
@@ -639,6 +683,20 @@ status_t WifiDisplaySource::sendM4(int32_t sessionID) {
                              (mUsingPCMAudio
                                 ? "LPCM 00000002 00" // 2 ch PCM 48kHz
                                 : "AAC 00000001 00")));  // 2 ch AAC 48kHz
+    }
+
+    if (mSinkSupportsUIBC) {
+        body.append(
+                StringPrintf(
+                    "wfd_uibc_capability: input_category_list=GENERIC;"
+                    "generic_cap_list=Mouse,SingleTouch;"
+                    "hidc_cap_list=none;"
+                    "port=%d\r\n", DEFAULT_UIBC_PORT)
+                );
+        body.append(
+                StringPrintf(
+                    "wfd_uibc_setting: %s\r\n", "enable")
+                );
     }
 
     body.append(
@@ -929,6 +987,23 @@ status_t WifiDisplaySource::onReceiveM3Response(
         ALOGE("Sink supports neither video nor audio...");
         return ERROR_UNSUPPORTED;
     }
+
+#if 1
+    mSinkSupportsUIBC = false;
+    if (!params->findParameter("wfd_uibc_capability", &value)) {
+        ALOGI("Sink doesn't appear to support uibc.");
+        ALOGI("mSinkSupportsUIBC --> false");
+    } else if (value == "none") {
+        ALOGI("Sink does not support uibc.");
+    } else {
+        mSinkSupportsUIBC = true;
+        ALOGI("Sink supports uibc.");
+        status_t err = startUibc(DEFAULT_UIBC_PORT);
+        if (err != OK) {
+            ALOGI("start uibc channel failed");
+        }
+    }
+#endif
 
     mUsingHDCP = false;
     if (!params->findParameter("wfd_content_protection", &value)) {
@@ -1507,6 +1582,11 @@ void WifiDisplaySource::finishStop2() {
     if (mSessionID != 0) {
         mNetSession->destroySession(mSessionID);
         mSessionID = 0;
+    }
+
+    if (mUibcSessionID != 0) {
+        mNetSession->destroySession(mUibcSessionID);
+        mUibcSessionID = 0;
     }
 
     ALOGI("We're stopped.");

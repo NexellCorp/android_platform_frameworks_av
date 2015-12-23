@@ -140,6 +140,8 @@ private:
     int32_t mAbs_x_max;
     int32_t mAbs_y_min;
     int32_t mAbs_y_max;
+    int32_t mVideoWidth;
+    int32_t mVideoHeight;
 
     uint32_t mStopReplyID;
 
@@ -303,6 +305,7 @@ const int16_t TOUCH_ACTION_MOVE = 2;
 const int16_t TOUCH_ACTION_CANCEL = 3;
 const int16_t TOUCH_ACTION_POINTER_DOWN = 5;
 const int16_t TOUCH_ACTION_POINTER_UP = 6;
+const int16_t TOUCH_RANDOM_PRESSURE = 1234;
 const int16_t KEY_ACTION_DOWN = 3;
 const int16_t KEY_ACTION_UP = 4;
 

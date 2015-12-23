@@ -153,6 +153,26 @@ void VideoFormats::setNativeResolution(ResolutionType type, size_t index) {
     setResolutionEnabled(type, index);
 }
 
+void VideoFormats::convertDpyInfo2Resolution(DisplayInfo dpy, ResolutionType &type, size_t &index) {
+    for (size_t i = 0; i < kNumResolutionTypes; i++) {
+        for (size_t j = 0; j < 32; j++) {
+            if (mResolutionTable[i][j].width == dpy.w
+             && mResolutionTable[i][j].height == dpy.h
+             && mResolutionTable[i][j].framesPerSecond == (size_t)dpy.fps) {
+                type = (ResolutionType)i;
+                index = j;
+                return;
+            }
+        }
+    }
+
+    // default
+    type = RESOLUTION_CEA;
+    index = 5;
+    ALOGI("No matched found... prefer type=%d index=%d", type, index);
+    return;
+}
+
 void VideoFormats::getNativeResolution(
         ResolutionType *type, size_t *index) const {
     *type = mNativeType;
@@ -408,6 +428,7 @@ bool VideoFormats::parseFormatSpec(const char *spec) {
                 mNativeType, mNativeIndex, NULL, NULL, NULL, NULL);
     }
 
+    ALOGI("GetConfiguration type=%d, index=%d", mNativeType, mNativeIndex);
     if (!success) {
         ALOGW("sink advertised an illegal native resolution, fortunately "
               "this value is ignored for the time being...");

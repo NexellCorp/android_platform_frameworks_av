@@ -37,6 +37,9 @@
 
 #include <arpa/inet.h>
 #include <cutils/properties.h>
+#include <gui/ISurfaceComposer.h>
+#include <gui/SurfaceComposerClient.h>
+#include <ui/DisplayInfo.h>
 
 #include <ctype.h>
 
@@ -60,6 +63,8 @@ WifiDisplaySource::WifiDisplaySource(
       mAbs_x_max(-1),
       mAbs_y_min(-1),
       mAbs_y_max(-1),
+      mVideoWidth(1280),
+      mVideoHeight(720),
       mStopReplyID(0),
       mChosenRTPPort(-1),
       mUsingPCMAudio(false),
@@ -76,14 +81,28 @@ WifiDisplaySource::WifiDisplaySource(
         mMediaPath.setTo(path);
     }
 
+    DisplayInfo mainDpyInfo;
+    VideoFormats::ResolutionType type;
+    size_t err = 0;
+    size_t index;
+    sp<IBinder> mainDpy = SurfaceComposerClient::getBuiltInDisplay(ISurfaceComposer::eDisplayIdMain);
+    err = SurfaceComposerClient::getDisplayInfo(mainDpy, &mainDpyInfo);
+    if (err != NO_ERROR) {
+        ALOGE("unable to get display characteristics");
+        return;
+    }
+    mSupportedSourceVideoFormats.convertDpyInfo2Resolution(mainDpyInfo, type, index);
+    ALOGI("Main display is %dx%d @%.2ffps, so pick best resolution type=%d, index=%d",
+            mainDpyInfo.w, mainDpyInfo.h, mainDpyInfo.fps, type, index);
+
     mSupportedSourceVideoFormats.disableAll();
 
     mSupportedSourceVideoFormats.setNativeResolution(
-            VideoFormats::RESOLUTION_CEA, 5);  // 1280x720 p30
+            type, index);
 
-    // Enable all resolutions up to 1280x720p30
+    // Enable all resolutions up to NativeResolution
     mSupportedSourceVideoFormats.enableResolutionUpto(
-            VideoFormats::RESOLUTION_CEA, 5,
+            type, index,
             VideoFormats::PROFILE_CHP,  // Constrained High Profile
             VideoFormats::LEVEL_32);    // Level 3.2
 }
@@ -179,11 +198,10 @@ int WifiDisplaySource::write_event(int fd, int type, int code, int value)
 
 void WifiDisplaySource::calculateXY(float x, float y, int32_t *abs_x, int32_t *abs_y)
 {
-    // TODO : hardcoding width, height
     *abs_x = mAbs_x_min + 
-        (int)((x * (float)(mAbs_x_max - mAbs_x_min)) / 1024 + 0.5);
+        (int)((x * (float)(mAbs_x_max - mAbs_x_min)) / mVideoWidth + 0.5);
     *abs_y = mAbs_y_min +
-        (int)((y * (float)(mAbs_y_max - mAbs_y_min)) / 768 + 0.5);
+        (int)((y * (float)(mAbs_y_max - mAbs_y_min)) / mVideoHeight + 0.5);
 }
 
 int WifiDisplaySource::containsNonZeroByte(const uint8_t *array, uint32_t startIndex, uint32_t endIndex)
@@ -300,21 +318,21 @@ status_t WifiDisplaySource::sendTouchEvent(int32_t action, int32_t x, int32_t y)
         ALOGI("action pointer down");
     case TOUCH_ACTION_MOVE:
         ALOGI("send move x=%d y=%d", x, y);
-        calculateXY(x*1.333-170.24, 1.333*y, &abs_x, &abs_y);
+        calculateXY(x, y, &abs_x, &abs_y);
         ALOGI("calc x=%d y=%d", abs_x, abs_y);
-        write_event(mUibcTouchFd, 3, 53, abs_x);
-        write_event(mUibcTouchFd, 3, 54, abs_y);
-        write_event(mUibcTouchFd, 3, 58, 1344);
-        write_event(mUibcTouchFd, 3, 48, 1);
-        write_event(mUibcTouchFd, 3, 57, 0);
-        write_event(mUibcTouchFd, 0, 2, 0);
-        write_event(mUibcTouchFd, 3, 53, 0);
-        write_event(mUibcTouchFd, 3, 54, 0);
-        write_event(mUibcTouchFd, 3, 58, 0);
-        write_event(mUibcTouchFd, 3, 48, 1);
-        write_event(mUibcTouchFd, 3, 57, 1);
-        write_event(mUibcTouchFd, 0, 2, 0);
-        write_event(mUibcTouchFd, 0, 0, 0);
+        write_event(mUibcTouchFd, EV_ABS, ABS_MT_POSITION_X, abs_x);
+        write_event(mUibcTouchFd, EV_ABS, ABS_MT_POSITION_Y, abs_y);
+        write_event(mUibcTouchFd, EV_ABS, ABS_MT_PRESSURE, TOUCH_RANDOM_PRESSURE);
+        write_event(mUibcTouchFd, EV_ABS, ABS_MT_TOUCH_MAJOR, 1);
+        write_event(mUibcTouchFd, EV_ABS, ABS_MT_TRACKING_ID, 0);
+        write_event(mUibcTouchFd, EV_SYN, SYN_MT_REPORT, 0);
+        write_event(mUibcTouchFd, EV_ABS, ABS_MT_POSITION_X, 0);
+        write_event(mUibcTouchFd, EV_ABS, ABS_MT_POSITION_Y, 0);
+        write_event(mUibcTouchFd, EV_ABS, ABS_MT_PRESSURE, 0);
+        write_event(mUibcTouchFd, EV_ABS, ABS_MT_TOUCH_MAJOR, 1);
+        write_event(mUibcTouchFd, EV_ABS, ABS_MT_TRACKING_ID, 1);
+        write_event(mUibcTouchFd, EV_SYN, SYN_MT_REPORT, 0);
+        write_event(mUibcTouchFd, EV_SYN, SYN_REPORT, 0);
         break;
     case TOUCH_ACTION_UP:
         ALOGI("action up");
@@ -322,19 +340,19 @@ status_t WifiDisplaySource::sendTouchEvent(int32_t action, int32_t x, int32_t y)
         ALOGI("action pointer up");
     case TOUCH_ACTION_CANCEL:
         ALOGI("action cancel");
-        write_event(mUibcTouchFd, 3, 53, 0);
-        write_event(mUibcTouchFd, 3, 54, 0);
-        write_event(mUibcTouchFd, 3, 58, 0);
-        write_event(mUibcTouchFd, 3, 48, 1);
-        write_event(mUibcTouchFd, 3, 57, 1);
-        write_event(mUibcTouchFd, 0, 2, 0);
-        write_event(mUibcTouchFd, 0, 0, 0);
+        write_event(mUibcTouchFd, EV_ABS, ABS_MT_POSITION_X, 0);
+        write_event(mUibcTouchFd, EV_ABS, ABS_MT_POSITION_Y, 0);
+        write_event(mUibcTouchFd, EV_ABS, ABS_MT_PRESSURE, 0);
+        write_event(mUibcTouchFd, EV_ABS, ABS_MT_TOUCH_MAJOR, 1);
+        write_event(mUibcTouchFd, EV_ABS, ABS_MT_TRACKING_ID, 1);
+        write_event(mUibcTouchFd, EV_SYN, SYN_MT_REPORT, 0);
+        write_event(mUibcTouchFd, EV_SYN, SYN_REPORT, 0);
         break;
     }
     return 0;
 }
 
-status_t WifiDisplaySource::sendKeyEvent(int16_t action, __attribute__((__unused__)) int16_t keycode)
+status_t WifiDisplaySource::sendKeyEvent(int16_t action, int16_t keycode)
 {
     if (mUibcKeyFd < 0) {
         scan_dir(DEV_DIR);
@@ -347,17 +365,13 @@ status_t WifiDisplaySource::sendKeyEvent(int16_t action, __attribute__((__unused
     switch (action) {
     case KEY_ACTION_DOWN:
         ALOGI("key down");
-        write_event(mUibcKeyFd, 1, 114, 1);
-        write_event(mUibcKeyFd, 0, 0, 0);
-        write_event(mUibcKeyFd, 1, 114, 0);
-        write_event(mUibcKeyFd, 0, 0, 0);
+        write_event(mUibcKeyFd, EV_KEY, keycode, 1);
+        write_event(mUibcKeyFd, EV_SYN, 0, 0);
         break;
     case KEY_ACTION_UP:
         ALOGI("key up");
-        write_event(mUibcKeyFd, 1, 115, 1);
-        write_event(mUibcKeyFd, 0, 0, 0);
-        write_event(mUibcKeyFd, 1, 115, 0);
-        write_event(mUibcKeyFd, 0, 0, 0);
+        write_event(mUibcKeyFd, EV_KEY, keycode, 0);
+        write_event(mUibcKeyFd, EV_SYN, 0, 0);
         break;
     }
     return 0;
@@ -365,28 +379,30 @@ status_t WifiDisplaySource::sendKeyEvent(int16_t action, __attribute__((__unused
 
 status_t WifiDisplaySource::parseUIBC(const uint8_t *data)
 {
-    ALOGI("parseUIBC");
-#if 0
-    if (data[6] < 3) {
-        for (int i = 0; i < data[7]; i++) {
+    // check timestamp
+    if (data[0] & (1 << 3)) {
+        // timestamp field exist
+        if (data[6] < 3) {
+            int32_t x = (int32_t)U16_AT(&data[11]);
+            int32_t y = (int32_t)U16_AT(&data[13]);
+            int32_t action = (int32_t)data[6];
             int16_t timestamp = (int32_t)U16_AT(&data[4]);
             if (timestamp > 0)
                 ALOGI("UIBC latency is %d", (int16_t)(ALooper::GetNowUs() - timestamp));
             sendTouchEvent(action, x, y);
+        } else if (data[6] == 3 || data[6] == 4) {
+            sendKeyEvent(data[6], data[8]);
         }
-    } else if (data[6] == 3 || data[6] == 4) {
-        sendKeyEvent(data[6], data[8]);
+    } else {
+        // no timestamp field
+        if (data[4] < 3) {
+            int32_t x = (int32_t)U16_AT(&data[9]);
+            int32_t y = (int32_t)U16_AT(&data[11]);
+            int32_t action = (int32_t)data[4];
+            ALOGI("wifi display source x=%d y=%d action=%d", x, y, action);
+            sendTouchEvent(action, x, y);
+        }
     }
-#else
-    // TODO Check TimeStamp Flag : data[0] & (1 << 3)
-    if (data[4] < 3) {
-        int32_t x = (int32_t)U16_AT(&data[9]);
-        int32_t y = (int32_t)U16_AT(&data[11]);
-        int32_t action = (int32_t)data[4];
-        ALOGI("wifi display source x=%d y=%d action=%d", x, y, action);
-        sendTouchEvent(action, x, y);
-    }
-#endif
     return OK;
 }
 
@@ -1217,6 +1233,9 @@ status_t WifiDisplaySource::onReceiveM3Response(
 
         ALOGI("Picked AVC profile %d, level %d",
               mChosenVideoProfile, mChosenVideoLevel);
+
+        mVideoWidth = width;
+        mVideoHeight = height;
     } else {
         ALOGI("Sink doesn't support video at all.");
     }

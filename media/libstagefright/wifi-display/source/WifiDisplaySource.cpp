@@ -44,7 +44,6 @@ namespace android {
 
 // static
 const AString WifiDisplaySource::sUserAgent = MakeUserAgent();
-const int32_t DEFAULT_UIBC_PORT = 7239;
 
 WifiDisplaySource::WifiDisplaySource(
         const sp<ANetworkSession> &netSession,
@@ -55,6 +54,12 @@ WifiDisplaySource::WifiDisplaySource(
       mClient(client),
       mSessionID(0),
       mUibcSessionID(0),
+      mUibcTouchFd(-1),
+      mUibcKeyFd(-1),
+      mAbs_x_min(-1),
+      mAbs_x_max(-1),
+      mAbs_y_min(-1),
+      mAbs_y_max(-1),
       mStopReplyID(0),
       mChosenRTPPort(-1),
       mUsingPCMAudio(false),
@@ -120,6 +125,7 @@ status_t WifiDisplaySource::startUibc(const int32_t port) {
             port,
             notify,
             &mUibcSessionID);
+    ALOGI("uibc session : %d", mUibcSessionID);
     return err;
 }
 
@@ -142,6 +148,282 @@ status_t WifiDisplaySource::resume() {
 
     sp<AMessage> response;
     return PostAndAwaitResponse(msg, &response);
+}
+
+#define DEV_DIR "/dev/input"
+#define sizeof_bit_array(bits)  ((bits + 7) / 8)
+#define test_bit(bit, array)    (array[bit/8] & (1<<(bit%8)))
+#define ABS_MT_POSITION_X 0x35
+#define ABS_MT_POSITION_Y 0x36
+struct input_event {
+    struct timeval time;
+    __u16 type;
+    __u16 code;
+    __s32 value;
+};
+
+int WifiDisplaySource::write_event(int fd, int type, int code, int value)
+{
+    struct input_event event;
+
+    memset(&event, 0, sizeof(event));
+    event.type = type;
+    event.code = code;
+    event.value = value;
+    if (write(fd, &event, sizeof(event)) < (int)sizeof(event)) {
+        ALOGI("write event failed[%d]: %s", errno, strerror(errno));
+        return -1;
+    }
+    return 0;
+}
+
+void WifiDisplaySource::calculateXY(float x, float y, int32_t *abs_x, int32_t *abs_y)
+{
+    // TODO : hardcoding width, height
+    *abs_x = mAbs_x_min + 
+        (int)((x * (float)(mAbs_x_max - mAbs_x_min)) / 1024 + 0.5);
+    *abs_y = mAbs_y_min +
+        (int)((y * (float)(mAbs_y_max - mAbs_y_min)) / 768 + 0.5);
+}
+
+int WifiDisplaySource::containsNonZeroByte(const uint8_t *array, uint32_t startIndex, uint32_t endIndex)
+{
+    const uint8_t *end = array + endIndex;
+    array += startIndex;
+    while (array != end) {
+        if (*(array++) != 0) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+int WifiDisplaySource::scan_dir(const char *dirname)
+{
+    char devname[PATH_MAX] = {0, };
+    char *filename;
+    DIR *dir;
+    struct dirent *de;
+    dir = opendir(dirname);
+    if (!dir) {
+        ALOGE("%s: failed to open %s", __func__, dirname);
+        return -1;
+    }
+    strcpy(devname, dirname);
+    filename = devname + strlen(devname);
+    *filename++ = '/';
+    while ((de = readdir(dir))) {
+        if (de->d_name[0] == '.' &&
+            (de->d_name[1] == '\0' ||
+              (de->d_name[1] == '.' && de->d_name[2] == '\0')))
+            continue;
+        strcpy(filename, de->d_name);
+        open_dev(devname);
+    }
+    closedir(dir);
+    return 0;
+}
+
+int WifiDisplaySource::open_dev(const char *deviceName)
+{
+    int fd;
+    int version;
+    uint8_t key_bitmask[sizeof_bit_array(KEY_MAX + 1)];
+    uint8_t abs_bitmask[sizeof_bit_array(ABS_MAX + 1)];
+    fd = open(deviceName, O_RDWR);
+    if (fd  < 0) {
+        ALOGI("could not open device %s uid=%d gid=%d [%d]: %s", deviceName, getuid(), getgid(), errno, strerror(errno));
+        return -1;
+    }
+
+    if (ioctl(fd, EVIOCGVERSION, &version)) {
+        ALOGI("failed to ioctl EVIOCGVERSION : deviceName %s", deviceName);
+        return -1;
+    }
+
+    memset(key_bitmask, 0, sizeof(key_bitmask));
+    if (ioctl(fd, EVIOCGBIT(EV_KEY, sizeof(key_bitmask)), key_bitmask) >= 0) {
+        if (containsNonZeroByte(key_bitmask, 0, sizeof_bit_array(BTN_MISC))
+            || containsNonZeroByte(key_bitmask, sizeof_bit_array(BTN_GAMEPAD), sizeof_bit_array(BTN_DIGI))
+            || containsNonZeroByte(key_bitmask, sizeof_bit_array(KEY_OK), sizeof_bit_array(KEY_MAX + 1))) {
+            mUibcKeyFd = fd;
+            ALOGI("get key input device: %s", deviceName);
+        }
+    }
+
+    memset(abs_bitmask, 0, sizeof(abs_bitmask));
+    if (ioctl(fd, EVIOCGBIT(EV_ABS, sizeof(abs_bitmask)), abs_bitmask) >= 0) {
+        if (test_bit(ABS_MT_POSITION_X, abs_bitmask)
+                && test_bit(ABS_MT_POSITION_Y, abs_bitmask)) {
+            mUibcTouchFd = fd;
+            ALOGI("get multi-touch input device: %s", deviceName);
+        } else if (test_bit(BTN_TOUCH, key_bitmask)
+                && test_bit(ABS_X, abs_bitmask) && test_bit(ABS_Y, abs_bitmask)) {
+            mUibcTouchFd = fd;
+            ALOGI("get single-touch input device: %s", deviceName);
+        }
+    }
+
+    return 0;
+}
+
+status_t WifiDisplaySource::sendTouchEvent(int32_t action, int32_t x, int32_t y)
+{
+    int32_t abs_x, abs_y;
+    struct input_absinfo absinfo;
+    if (mUibcTouchFd < 0) {
+        scan_dir(DEV_DIR);
+
+        // Get touch screen absolute Axis edge value
+        if (ioctl(mUibcTouchFd, EVIOCGABS(ABS_MT_POSITION_X), &absinfo)) {
+            ALOGI("Error reading absolute controller ABS_X[%d]: %s", errno, strerror(errno));
+            return -1;
+        }
+        mAbs_x_min = absinfo.minimum;
+        mAbs_x_max = absinfo.maximum;
+        if (ioctl(mUibcTouchFd, EVIOCGABS(ABS_MT_POSITION_Y), &absinfo)) {
+            ALOGI("Error reading absolute controller ABS_Y[%d]: %s", errno, strerror(errno));
+            return -2;
+        }
+        mAbs_y_min = absinfo.minimum;
+        mAbs_y_max = absinfo.maximum;
+    }
+    if (mUibcTouchFd < 0) {
+        ALOGI("coudn't open touch event device");
+        return -3;
+    }
+
+    switch (action) {
+    case TOUCH_ACTION_DOWN:
+        ALOGI("action down");
+    case TOUCH_ACTION_POINTER_DOWN:
+        ALOGI("action pointer down");
+    case TOUCH_ACTION_MOVE:
+        ALOGI("send move x=%d y=%d", x, y);
+        calculateXY(x*1.333-170.24, 1.333*y, &abs_x, &abs_y);
+        ALOGI("calc x=%d y=%d", abs_x, abs_y);
+        write_event(mUibcTouchFd, 3, 53, abs_x);
+        write_event(mUibcTouchFd, 3, 54, abs_y);
+        write_event(mUibcTouchFd, 3, 58, 1344);
+        write_event(mUibcTouchFd, 3, 48, 1);
+        write_event(mUibcTouchFd, 3, 57, 0);
+        write_event(mUibcTouchFd, 0, 2, 0);
+        write_event(mUibcTouchFd, 3, 53, 0);
+        write_event(mUibcTouchFd, 3, 54, 0);
+        write_event(mUibcTouchFd, 3, 58, 0);
+        write_event(mUibcTouchFd, 3, 48, 1);
+        write_event(mUibcTouchFd, 3, 57, 1);
+        write_event(mUibcTouchFd, 0, 2, 0);
+        write_event(mUibcTouchFd, 0, 0, 0);
+        break;
+    case TOUCH_ACTION_UP:
+        ALOGI("action up");
+    case TOUCH_ACTION_POINTER_UP:
+        ALOGI("action pointer up");
+    case TOUCH_ACTION_CANCEL:
+        ALOGI("action cancel");
+        write_event(mUibcTouchFd, 3, 53, 0);
+        write_event(mUibcTouchFd, 3, 54, 0);
+        write_event(mUibcTouchFd, 3, 58, 0);
+        write_event(mUibcTouchFd, 3, 48, 1);
+        write_event(mUibcTouchFd, 3, 57, 1);
+        write_event(mUibcTouchFd, 0, 2, 0);
+        write_event(mUibcTouchFd, 0, 0, 0);
+        break;
+    }
+    return 0;
+}
+
+status_t WifiDisplaySource::sendKeyEvent(int16_t action, __attribute__((__unused__)) int16_t keycode)
+{
+    if (mUibcKeyFd < 0) {
+        scan_dir(DEV_DIR);
+    }
+    if (mUibcKeyFd < 0) {
+        ALOGE("couldn't open key event device");
+        return -3;
+    }
+
+    switch (action) {
+    case KEY_ACTION_DOWN:
+        ALOGI("key down");
+        write_event(mUibcKeyFd, 1, 114, 1);
+        write_event(mUibcKeyFd, 0, 0, 0);
+        write_event(mUibcKeyFd, 1, 114, 0);
+        write_event(mUibcKeyFd, 0, 0, 0);
+        break;
+    case KEY_ACTION_UP:
+        ALOGI("key up");
+        write_event(mUibcKeyFd, 1, 115, 1);
+        write_event(mUibcKeyFd, 0, 0, 0);
+        write_event(mUibcKeyFd, 1, 115, 0);
+        write_event(mUibcKeyFd, 0, 0, 0);
+        break;
+    }
+    return 0;
+}
+
+status_t WifiDisplaySource::parseUIBC(const uint8_t *data)
+{
+    ALOGI("parseUIBC");
+#if 0
+    if (data[6] < 3) {
+        for (int i = 0; i < data[7]; i++) {
+            int16_t timestamp = (int32_t)U16_AT(&data[4]);
+            if (timestamp > 0)
+                ALOGI("UIBC latency is %d", (int16_t)(ALooper::GetNowUs() - timestamp));
+            sendTouchEvent(action, x, y);
+        }
+    } else if (data[6] == 3 || data[6] == 4) {
+        sendKeyEvent(data[6], data[8]);
+    }
+#else
+    // TODO Check TimeStamp Flag : data[0] & (1 << 3)
+    if (data[4] < 3) {
+        int32_t x = (int32_t)U16_AT(&data[9]);
+        int32_t y = (int32_t)U16_AT(&data[11]);
+        int32_t action = (int32_t)data[4];
+        ALOGI("wifi display source x=%d y=%d action=%d", x, y, action);
+        sendTouchEvent(action, x, y);
+    }
+#endif
+    return OK;
+}
+
+// 2byte: version, timestamp_flag, inputcategory
+// 2byte: length
+// 1byte: input type (0:touch down, 1:touch up, 2: touchmove)
+// 2byte: length
+// 1byte: num of pointers (defautl: 1) (just single)
+// 1byte: pointer ID
+// 2byte: posx
+// 2byte: posy
+static void _dump_uibc_data(const uint8_t *data)
+{
+    ALOGI("dump uibc data ====>");
+    for (int i = 0; i < 13; i++) {
+        ALOGI("%d --> 0x%x", i, data[i]);
+    }
+    ALOGI("end of dump");
+}
+
+status_t WifiDisplaySource::onUIBCData(const sp<ABuffer> &buffer)
+{
+    const uint8_t *data = buffer->data();
+    ALOGI("buffer size %d", buffer->size());
+
+    _dump_uibc_data(data);
+    switch (data[1]) {
+    case INPUT_CATEGORY_GENERIC:
+        parseUIBC((const uint8_t *)data);
+        break;
+    case INPUT_CATEGORY_HIDC:
+        break;
+    default:
+        ALOGW("Unknown RTCP packet type %u", (unsigned)data[1]);
+        break;
+    }
+    return OK;
 }
 
 void WifiDisplaySource::onMessageReceived(const sp<AMessage> &msg) {
@@ -194,32 +476,50 @@ void WifiDisplaySource::onMessageReceived(const sp<AMessage> &msg) {
             break;
         }
 
-        case kWhatStartUibc:
-        {
-            uint32_t replyID;
-            CHECK(msg->senderAwaitsResponse(&replyID));
-
-            int32_t localUibcPort;
-            CHECK(msg->findInt32("port", &localUibcPort));
-            ALOGI("Create listening uibc tcp channel on port %d", localUibcPort);
-
-            status_t err = OK;
-            sp<AMessage> notify = new AMessage(kWhatUIBCNotify, id());
-            err = mNetSession->createTCPDatagramSession(
-                    mInterfaceAddr,
-                    localUibcPort,
-                    notify,
-                    &mUibcSessionID);
-
-            sp<AMessage> response = new AMessage;
-            response->setInt32("err", err);
-            response->postReply(replyID);
-            break;
-        }
+        // case kWhatStartUibc:
+        // {
+        //     uint32_t replyID;
+        //     CHECK(msg->senderAwaitsResponse(&replyID));
+        //
+        //     int32_t localUibcPort;
+        //     CHECK(msg->findInt32("port", &localUibcPort));
+        //     ALOGI("Create listening uibc tcp channel on port %d", localUibcPort);
+        //
+        //     status_t err = OK;
+        //     sp<AMessage> notify = new AMessage(kWhatUIBCNotify, id());
+        //     err = mNetSession->createTCPDatagramSession(
+        //             mInterfaceAddr,
+        //             localUibcPort,
+        //             notify,
+        //             &mUibcSessionID);
+        //
+        //     sp<AMessage> response = new AMessage;
+        //     response->setInt32("err", err);
+        //     response->postReply(replyID);
+        //     break;
+        // }
 
         case kWhatUIBCNotify:
         {
-            ALOGI("get uibc notify");
+            int32_t reason;
+            CHECK(msg->findInt32("reason", &reason));
+            ALOGI("get uibc notify reason=%d", reason);
+            switch (reason) {
+                case ANetworkSession::kWhatClientConnected:
+                    ALOGI("UIBC Client Connected");
+                    break;
+                case ANetworkSession::kWhatDatagram:
+                {
+                    int32_t sessionID;
+                    CHECK(msg->findInt32("sessionID", &sessionID));
+                    ALOGI("sessionID : %d", sessionID);
+                    sp<ABuffer> data;
+                    CHECK(msg->findBuffer("data", &data));
+                    if (data->size())
+                        onUIBCData(data);
+                    break;
+                }
+            }
             break;
         }
 
@@ -997,7 +1297,7 @@ status_t WifiDisplaySource::onReceiveM3Response(
         ALOGI("Sink does not support uibc.");
     } else {
         mSinkSupportsUIBC = true;
-        ALOGI("Sink supports uibc.");
+        ALOGI("Sink supports uibc. --> value %s", value.c_str());
         status_t err = startUibc(DEFAULT_UIBC_PORT);
         if (err != OK) {
             ALOGI("start uibc channel failed");
@@ -1735,6 +2035,16 @@ void WifiDisplaySource::disconnectClient2() {
     if (mClientSessionID != 0) {
         mNetSession->destroySession(mClientSessionID);
         mClientSessionID = 0;
+    }
+
+    if (mUibcTouchFd >= 0) {
+        close(mUibcTouchFd);
+        mUibcTouchFd = -1;
+    }
+
+    if (mUibcKeyFd >= 0) {
+        close(mUibcKeyFd);
+        mUibcKeyFd = -1;
     }
 
     mClient->onDisplayDisconnected();

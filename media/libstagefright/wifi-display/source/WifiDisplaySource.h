@@ -23,7 +23,14 @@
 #include <media/stagefright/foundation/AHandler.h>
 #include <media/stagefright/foundation/ANetworkSession.h>
 
+#include <media/stagefright/foundation/ABuffer.h>
 #include <netinet/in.h>
+#include <fcntl.h>
+#include <sys/ioctl.h>
+#include <linux/input.h>
+#include <dirent.h>
+#include <errno.h>
+#include <stdlib.h>
 
 namespace android {
 
@@ -42,8 +49,12 @@ struct WifiDisplaySource : public AHandler {
             const char *path = NULL);
 
     status_t start(const char *iface);
+    status_t parseUIBC(const uint8_t *d);
+    status_t onUIBCData(const sp<ABuffer> &buffer);
+    status_t startUibc(const int32_t port);
     status_t stop();
-
+    status_t sendTouchEvent(int32_t action, int32_t x, int32_t y);
+    status_t sendKeyEvent(int16_t action, int16_t keycode);
     status_t pause();
     status_t resume();
 
@@ -73,6 +84,7 @@ private:
     enum {
         kWhatStart,
         kWhatRTSPNotify,
+        kWhatUIBCNotify,
         kWhatStop,
         kWhatPause,
         kWhatResume,
@@ -120,6 +132,16 @@ private:
     AString mMediaPath;
     struct in_addr mInterfaceAddr;
     int32_t mSessionID;
+    int32_t mUibcSessionID;
+
+    int32_t mUibcTouchFd;
+    int32_t mUibcKeyFd;
+    int32_t mAbs_x_min;
+    int32_t mAbs_x_max;
+    int32_t mAbs_y_min;
+    int32_t mAbs_y_max;
+    int32_t mVideoWidth;
+    int32_t mVideoHeight;
 
     uint32_t mStopReplyID;
 
@@ -136,6 +158,7 @@ private:
 
     bool mSinkSupportsAudio;
 
+    bool mSinkSupportsUIBC;
     bool mUsingPCMAudio;
     int32_t mClientSessionID;
 
@@ -264,8 +287,27 @@ private:
 
     void finishPlay();
 
+    int scan_dir(const char *dirname);
+    int open_dev(const char *deviceName);
+    int write_event(int fd, int type, int code, int value);
+    void calculateXY(float x, float y, int *abs_x, int *abs_y);
+    int containsNonZeroByte(const uint8_t *array, uint32_t startIndex, uint32_t endIndex);
     DISALLOW_EVIL_CONSTRUCTORS(WifiDisplaySource);
 };
+
+// UIBC magic numbers
+const int32_t DEFAULT_UIBC_PORT = 7239;
+const int16_t INPUT_CATEGORY_GENERIC = 0x00;
+const int16_t INPUT_CATEGORY_HIDC = 0x01;
+const int16_t TOUCH_ACTION_DOWN = 0;
+const int16_t TOUCH_ACTION_UP = 1;
+const int16_t TOUCH_ACTION_MOVE = 2;
+const int16_t TOUCH_ACTION_CANCEL = 3;
+const int16_t TOUCH_ACTION_POINTER_DOWN = 5;
+const int16_t TOUCH_ACTION_POINTER_UP = 6;
+const int16_t TOUCH_RANDOM_PRESSURE = 1234;
+const int16_t KEY_ACTION_DOWN = 3;
+const int16_t KEY_ACTION_UP = 4;
 
 }  // namespace android
 

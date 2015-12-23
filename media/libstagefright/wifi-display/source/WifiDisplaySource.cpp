@@ -410,9 +410,9 @@ static void _dump_uibc_data(const uint8_t *data)
 status_t WifiDisplaySource::onUIBCData(const sp<ABuffer> &buffer)
 {
     const uint8_t *data = buffer->data();
-    ALOGI("buffer size %d", buffer->size());
+    // ALOGI("buffer size %d", buffer->size());
 
-    _dump_uibc_data(data);
+    // _dump_uibc_data(data);
     switch (data[1]) {
     case INPUT_CATEGORY_GENERIC:
         parseUIBC((const uint8_t *)data);
@@ -475,29 +475,6 @@ void WifiDisplaySource::onMessageReceived(const sp<AMessage> &msg) {
             response->postReply(replyID);
             break;
         }
-
-        // case kWhatStartUibc:
-        // {
-        //     uint32_t replyID;
-        //     CHECK(msg->senderAwaitsResponse(&replyID));
-        //
-        //     int32_t localUibcPort;
-        //     CHECK(msg->findInt32("port", &localUibcPort));
-        //     ALOGI("Create listening uibc tcp channel on port %d", localUibcPort);
-        //
-        //     status_t err = OK;
-        //     sp<AMessage> notify = new AMessage(kWhatUIBCNotify, id());
-        //     err = mNetSession->createTCPDatagramSession(
-        //             mInterfaceAddr,
-        //             localUibcPort,
-        //             notify,
-        //             &mUibcSessionID);
-        //
-        //     sp<AMessage> response = new AMessage;
-        //     response->setInt32("err", err);
-        //     response->postReply(replyID);
-        //     break;
-        // }
 
         case kWhatUIBCNotify:
         {

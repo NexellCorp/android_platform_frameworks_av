@@ -252,8 +252,6 @@ status_t StreamingProcessor::deletePreviewStreamNoLocked() {
     return OK;
 }
 // end psw0523
-
-
 int StreamingProcessor::getPreviewStreamId() const {
     Mutex::Autolock m(mMutex);
     return mPreviewStreamId;
@@ -444,7 +442,6 @@ status_t StreamingProcessor::deleteRecordingStream() {
     }
     return OK;
 }
-
 // psw0523 add
 status_t StreamingProcessor::deleteRecordingStreamLocked() {
     ATRACE_CALL();
@@ -478,7 +475,6 @@ status_t StreamingProcessor::deleteRecordingStreamLocked() {
     return OK;
 }
 // end psw0523
-
 int StreamingProcessor::getRecordingStreamId() const {
     return mRecordingStreamId;
 }

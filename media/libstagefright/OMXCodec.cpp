@@ -494,29 +494,24 @@ status_t OMXCodec::configureCodec(const sp<MetaData> &meta) {
 			{
 				if(!strncmp(mComponentName, "OMX.NX.VIDEO", 12))
 				{
-					//	Set FFMPEG Extradata
 					OMX_INDEXTYPE index;
 					status_t err = mOMX->getExtensionIndex( mNode, "OMX.NX.VIDEO_DECODER.Extradata", &index);
 					if (err != OK) {
 						CODEC_LOGE("getExtensionIndex('OMX.NX.VIDEO_DECODER.Extradata') returned error 0x%08x", err);
 						return OMX_ErrorNotImplemented;
 					}
-
-					//	Enable ThumbNailMode
 					uint8_t *extData = new uint8_t[size + 4];
 					*((int32_t*)extData) = size;
 					memcpy( extData+4, data, size );
 					err = mOMX->setParameter(mNode, index, extData, size+4);
 					delete []extData;
-
 					if (err != OK) {
 						CODEC_LOGE("setParameter('OMX.NX.VIDEO_DECODER.Extradata') returned error 0x%08x", err);
 						return OMX_ErrorNotImplemented;
 					}
-				}
+    }
 				else if ( !strncmp(mComponentName, "OMX.NX.AUDIO_DECODER.FFMPEG", 27 ) )
 				{
-					//	Set FFMPEG Extradata
 					OMX_INDEXTYPE index;
 					status_t err = mOMX->getExtensionIndex( mNode, "OMX.NX.AUDIO_DECODER.FFMPEG.Extradata", &index);
 					if (err != OK) {
@@ -529,7 +524,6 @@ status_t OMXCodec::configureCodec(const sp<MetaData> &meta) {
 					memcpy( extData+4, data, size );
 					err = mOMX->setParameter(mNode, index, extData, size+4);
 					delete []extData;
-
 					if (err != OK) {
 						CODEC_LOGE("setParameter('OMX.NX.AUDIO_DECODER.FFMPEG.Extradata') returned error 0x%08x", err);
 						return OMX_ErrorNotImplemented;
@@ -538,13 +532,10 @@ status_t OMXCodec::configureCodec(const sp<MetaData> &meta) {
 			}
 		}
     }
-
     int32_t bitRate = 0;
     if (mIsEncoder) {
         CHECK(meta->findInt32(kKeyBitRate, &bitRate));
     }
-
-	//	FFMPEG Video Decoder
 	if( !strncmp(mComponentName, "OMX.NX.VIDEO_DECODER", 20) )
 	{
 		int32_t wmvVersion, codecTag;
@@ -552,7 +543,6 @@ status_t OMXCodec::configureCodec(const sp<MetaData> &meta) {
 		{
 			OMX_VIDEO_PARAM_WMVTYPE profile;
 			memset(&profile, 0, sizeof(profile));
-
 			switch( wmvVersion )
 			{
 #if 0
@@ -587,7 +577,6 @@ status_t OMXCodec::configureCodec(const sp<MetaData> &meta) {
 			}
 		}
 	}
-
     int32_t numChannels, sampleRate;
     if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_AMR_NB, mMIME)) {
         setAMRFormat(false /* isWAMR */, bitRate);
@@ -638,9 +627,7 @@ status_t OMXCodec::configureCodec(const sp<MetaData> &meta) {
         meta->findInt32(kKeyWMAVersion, &version);
         setWMAFormat(numChannels, sampleRate, blockAlign, bitRate, version);
      }
-
 #if 1
-
     else if ( !strncmp(mComponentName, "OMX.NX.AUDIO_DECODER", 20) && !strcasecmp(MEDIA_MIMETYPE_AUDIO_MPEG, mMIME) ) {
         int32_t version = 0;
         if( !meta->findInt32(kKeyMpegAudioLayer, &version ) )
@@ -651,20 +638,14 @@ status_t OMXCodec::configureCodec(const sp<MetaData> &meta) {
      }
     else if ( !strncmp(mComponentName, "OMX.NX.AUDIO_DECODER", 20) && !strcasecmp(MEDIA_MIMETYPE_AUDIO_MPEG_LAYER_II, mMIME) ) {
         int32_t version = 0;
-        //if( !meta->findInt32(kKeyMpegAudioLayer, &version ) )
-        //    return ERROR_UNSUPPORTED;
         CHECK(meta->findInt32(kKeyChannelCount, &numChannels));
         CHECK(meta->findInt32(kKeySampleRate, &sampleRate));
         setMPGAuidoFormat(numChannels, sampleRate);
      }
-
 #else
-
 #if 0   //  Use MP3 Decoding to FFMPEG Audio Decoder ( Can Support Layer 1,2,3 )
     else if ( !strncmp(mComponentName, "OMX.NX.AUDIO_DECODER", 20) && !strcasecmp(MEDIA_MIMETYPE_AUDIO_MPEG, mMIME) ) {
         int32_t version = 0;
-        //if( !meta->findInt32(kKeyMpegAudioLayer, &version ) )
-        //    return ERROR_UNSUPPORTED;
         CHECK(meta->findInt32(kKeyChannelCount, &numChannels));
         CHECK(meta->findInt32(kKeySampleRate, &sampleRate));
         setMPGAuidoFormat(numChannels, sampleRate);
@@ -673,17 +654,12 @@ status_t OMXCodec::configureCodec(const sp<MetaData> &meta) {
 #if 1   //  Use MP2 Decoding to FFMPEG Audio Decoder ( Can Support Layer 1,2,3 )
     else if ( !strcasecmp(MEDIA_MIMETYPE_AUDIO_MPEG_LAYER_II, mMIME) ) {
         int32_t version = 0;
-        //if( !meta->findInt32(kKeyMpegAudioLayer, &version ) )
-        //    return ERROR_UNSUPPORTED;
         CHECK(meta->findInt32(kKeyChannelCount, &numChannels));
         CHECK(meta->findInt32(kKeySampleRate, &sampleRate));
         setMPGAuidoFormat(numChannels, sampleRate);
      }
 #endif
-
-
 #endif
-
 #endif
 	else if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_AAC, mMIME)) {
         int32_t numChannels, sampleRate, aacProfile;
@@ -801,7 +777,6 @@ status_t OMXCodec::configureCodec(const sp<MetaData> &meta) {
 			return OMX_ErrorNotImplemented;
         }
 	}
-
     if (mNativeWindow != NULL
         && !mIsEncoder
         && !strncasecmp(mMIME, "video/", 6)
@@ -941,7 +916,6 @@ status_t OMXCodec::findTargetColorFormat(
     }
 
     // Check whether the target color format is supported.
-    // psw0523 fix
 #if 0
     return isColorFormatSupported(*colorFormat, kPortIndexInput);
 #else
@@ -1590,7 +1564,6 @@ void OMXCodec::setComponentRole(
              "audio_decoder.ra", "audio_encoder.ra" },
 		{ MEDIA_MIMETYPE_AUDIO_WMA,
              "audio_decoder.x-ms-wma", "audio_encoder.x-ms-wma" },
-
         { MEDIA_MIMETYPE_AUDIO_MPEG,
             "audio_decoder.mp3", "audio_encoder.mp3" },
         { MEDIA_MIMETYPE_AUDIO_MPEG_LAYER_I,
@@ -1613,8 +1586,6 @@ void OMXCodec::setComponentRole(
             "video_decoder.avc", "video_encoder.avc" },
         { MEDIA_MIMETYPE_VIDEO_MPEG4,
             "video_decoder.mpeg4", "video_encoder.mpeg4" },
-
-		//	Added by Ray Park 20130730
         { MEDIA_MIMETYPE_VIDEO_MPEG2,
             "video_decoder.mpeg2", "video_encoder.mpeg2" },
         { MEDIA_MIMETYPE_VIDEO_WMV,
@@ -1629,7 +1600,6 @@ void OMXCodec::setComponentRole(
             "video_decoder.x-pn-realvideo", "video_encoder.x-pn-realvideo" },
         { MEDIA_MIMETYPE_VIDEO_FLV,
             "video_decoder.x-flv", "video_encoder.x-flv" },
-
         { MEDIA_MIMETYPE_VIDEO_H263,
             "video_decoder.h263", "video_encoder.h263" },
         { MEDIA_MIMETYPE_VIDEO_VP8,
@@ -3604,12 +3574,10 @@ static OMX_AUDIO_AMRBANDMODETYPE pickModeFromBitRate(bool isAMRWB, int32_t bps) 
         return OMX_AUDIO_AMRBandModeNB7;
     }
 }
-
 #if 1   // Added by  2013_07_18
 #define OMX_IndexParamAudioAc3  (OMX_IndexVendorStartUnused + 0x00)		//  Define AC3 Parameters
 #define OMX_IndexParamAudioDTS  (OMX_IndexVendorStartUnused + 0x01)		//  Define DTS Parameters
 #define OMX_IndexParamAudioFLAC (OMX_IndexVendorStartUnused + 0x02)		//  Define FLAC Parameters
-
 typedef struct OMX_AUDIO_PARAM_AC3TYPE{
 	OMX_U32 nSize;
 	OMX_VERSIONTYPE nVersion;
@@ -3618,7 +3586,6 @@ typedef struct OMX_AUDIO_PARAM_AC3TYPE{
 	OMX_U32 nBitRate;
 	OMX_U32 nSampleRate;
 } OMX_AUDIO_PARAM_AC3TYPE;
- 
 typedef struct OMX_AUDIO_PARAM_DTSTYPE{
 	OMX_U32 nSize;
 	OMX_VERSIONTYPE nVersion;
@@ -3627,7 +3594,6 @@ typedef struct OMX_AUDIO_PARAM_DTSTYPE{
 	OMX_U32 nBitRate;
 	OMX_U32 nSampleRate;
 } OMX_AUDIO_PARAM_DTSTYPE;
- 
 typedef struct OMX_AUDIO_PARAM_FLACTYPE{
 	OMX_U32 nSize;
 	OMX_VERSIONTYPE nVersion;
@@ -3636,7 +3602,6 @@ typedef struct OMX_AUDIO_PARAM_FLACTYPE{
 	OMX_U32 nBitRate;
 	OMX_U32 nSampleRate;
 } OMX_AUDIO_PARAM_FLACTYPE; 
-
 void OMXCodec::setAC3Format(int32_t numChannels, int32_t sampleRate, int32_t bitRate)
 {
 	OMX_AUDIO_PARAM_AC3TYPE profile;
@@ -3644,15 +3609,12 @@ void OMXCodec::setAC3Format(int32_t numChannels, int32_t sampleRate, int32_t bit
 	profile.nPortIndex = kPortIndexInput;
 	status_t err = mOMX->getParameter(mNode, (OMX_INDEXTYPE)OMX_IndexParamAudioAc3, &profile, sizeof(profile));
 	CHECK_EQ(err, (status_t)OK);
-
 	profile.nChannels = numChannels;
 	profile.nSampleRate = sampleRate;
 	profile.nBitRate = bitRate;
-
 	err = mOMX->setParameter( mNode, (OMX_INDEXTYPE)OMX_IndexParamAudioAc3, &profile, sizeof(profile));
 	CHECK_EQ(err, (status_t)OK);
 }
-
 void OMXCodec::setDTSFormat(int32_t numChannels, int32_t sampleRate, int32_t bitRate)
 {
 	OMX_AUDIO_PARAM_DTSTYPE profile;
@@ -3660,15 +3622,12 @@ void OMXCodec::setDTSFormat(int32_t numChannels, int32_t sampleRate, int32_t bit
 	profile.nPortIndex = kPortIndexInput;
 	status_t err = mOMX->getParameter(mNode, (OMX_INDEXTYPE)OMX_IndexParamAudioDTS, &profile, sizeof(profile));
 	CHECK_EQ(err, (status_t)OK);
-
 	profile.nChannels = numChannels;
 	profile.nSampleRate = sampleRate;
 	profile.nBitRate = bitRate;
-
 	err = mOMX->setParameter( mNode, (OMX_INDEXTYPE)OMX_IndexParamAudioDTS, &profile, sizeof(profile));
 	CHECK_EQ(err, (status_t)OK);
 }
-
 void OMXCodec::setFLACFormat(int32_t numChannels, int32_t sampleRate, int32_t bitRate)
 {
 	OMX_AUDIO_PARAM_FLACTYPE profile;
@@ -3676,15 +3635,12 @@ void OMXCodec::setFLACFormat(int32_t numChannels, int32_t sampleRate, int32_t bi
 	profile.nPortIndex = kPortIndexInput;
 	status_t err = mOMX->getParameter(mNode, (OMX_INDEXTYPE)OMX_IndexParamAudioFLAC, &profile, sizeof(profile));
 	CHECK_EQ(err, (status_t)OK);
-
 	profile.nChannels = numChannels;
 	profile.nSampleRate = sampleRate;
 	profile.nBitRate = bitRate;
-
 	err = mOMX->setParameter( mNode, (OMX_INDEXTYPE)OMX_IndexParamAudioFLAC, &profile, sizeof(profile));
 	CHECK_EQ(err, (status_t)OK);
 }
-
 void OMXCodec::setRAFormat(int32_t numChannels, int32_t sampleRate, int32_t bitsPerSample, int32_t bitRate)
 {
 	OMX_AUDIO_PARAM_RATYPE profile;
@@ -3692,21 +3648,18 @@ void OMXCodec::setRAFormat(int32_t numChannels, int32_t sampleRate, int32_t bits
 	profile.nPortIndex = kPortIndexInput;
 	status_t err = mOMX->getParameter(mNode, (OMX_INDEXTYPE)OMX_IndexParamAudioRa, &profile, sizeof(profile));
 	CHECK_EQ(err, (status_t)OK);
-
 	profile.nChannels = numChannels;
 	profile.nSamplingRate = sampleRate;
 	profile.nBitsPerFrame = bitsPerSample;
 	err = mOMX->setParameter( mNode, (OMX_INDEXTYPE)OMX_IndexParamAudioRa, &profile, sizeof(profile));
 	CHECK_EQ(err, (status_t)OK);
 }
-
 void OMXCodec::setWMAFormat(int32_t numChannels, int32_t sampleRate, int32_t blockAlign, int32_t bitRate, int32_t version) {
 	OMX_AUDIO_PARAM_WMATYPE profile;
 	InitOMXParams(&profile);
 	profile.nPortIndex = kPortIndexInput;
 	status_t err = mOMX->getParameter(mNode, (OMX_INDEXTYPE)OMX_IndexParamAudioWma, &profile, sizeof(profile));
 	CHECK_EQ(err, (status_t)OK);
-
 	profile.nBitRate = bitRate;
 	profile.nChannels = numChannels;
 	profile.nSamplingRate = sampleRate;
@@ -3726,7 +3679,6 @@ void OMXCodec::setWMAFormat(int32_t numChannels, int32_t sampleRate, int32_t blo
 	err = mOMX->setParameter( mNode, (OMX_INDEXTYPE)OMX_IndexParamAudioWma, &profile, sizeof(profile));
 	CHECK_EQ(err, (status_t)OK);
 }
-
 void OMXCodec::setMPGAuidoFormat(int32_t numChannels, int32_t sampleRate)
 {
     OMX_AUDIO_PARAM_MP3TYPE profile;
@@ -3734,16 +3686,12 @@ void OMXCodec::setMPGAuidoFormat(int32_t numChannels, int32_t sampleRate)
     profile.nPortIndex = kPortIndexInput;
     status_t err = mOMX->getParameter(mNode, (OMX_INDEXTYPE)OMX_IndexParamAudioMp3, &profile, sizeof(profile));
     CHECK_EQ(err, (status_t)OK);
-
     profile.nChannels = numChannels;
     profile.nSampleRate = sampleRate;
     err = mOMX->setParameter( mNode, (OMX_INDEXTYPE)OMX_IndexParamAudioMp3, &profile, sizeof(profile));
     CHECK_EQ(err, (status_t)OK);
 }
-
 #endif
-
-
 
 void OMXCodec::setAMRFormat(bool isWAMR, int32_t bitRate) {
     OMX_U32 portIndex = mIsEncoder ? kPortIndexOutput : kPortIndexInput;

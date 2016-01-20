@@ -521,7 +521,6 @@ static const struct mime_conv_t mimeLookup[] = {
     { MEDIA_MIMETYPE_AUDIO_RAW,         AUDIO_FORMAT_PCM_16_BIT },
     { MEDIA_MIMETYPE_AUDIO_AMR_NB,      AUDIO_FORMAT_AMR_NB },
     { MEDIA_MIMETYPE_AUDIO_AMR_WB,      AUDIO_FORMAT_AMR_WB },
-
     //  Added by Ray Park for AC3 offloading
     { MEDIA_MIMETYPE_AUDIO_MPEG_LAYER_I,AUDIO_FORMAT_DEFAULT },
     { MEDIA_MIMETYPE_AUDIO_MPEG_LAYER_II,AUDIO_FORMAT_DEFAULT },
@@ -530,7 +529,6 @@ static const struct mime_conv_t mimeLookup[] = {
     { MEDIA_MIMETYPE_AUDIO_RA,          AUDIO_FORMAT_DEFAULT },
     { MEDIA_MIMETYPE_AUDIO_WMA,         AUDIO_FORMAT_DEFAULT },
     { MEDIA_MIMETYPE_AUDIO_FLAC,        AUDIO_FORMAT_DEFAULT },
-
     { MEDIA_MIMETYPE_AUDIO_AAC,         AUDIO_FORMAT_AAC },
     { MEDIA_MIMETYPE_AUDIO_VORBIS,      AUDIO_FORMAT_VORBIS },
     { 0, AUDIO_FORMAT_INVALID }
@@ -570,6 +568,17 @@ bool canOffloadStream(const sp<MetaData>& meta, bool hasVideo,
         // can't offload if we don't know what the source format is
         ALOGE("mime type \"%s\" not a known audio format", mime);
         return false;
+    }
+
+    // check whether it is ELD/LD content -> no offloading
+    // FIXME: this should depend on audio DSP capabilities. mapMimeToAudioFormat() should use the
+    // metadata to refine the AAC format and the audio HAL should only list supported profiles.
+    int32_t aacaot = -1;
+    if (meta->findInt32(kKeyAACAOT, &aacaot)) {
+        if (aacaot == 23 || aacaot == 39 ) {
+            ALOGV("track of type '%s' is ELD/LD content", mime);
+            return false;
+        }
     }
 
     int32_t srate = -1;

@@ -69,7 +69,6 @@ extern const char *MEDIA_MIMETYPE_CONTAINER_WMV;
 extern const char *MEDIA_MIMETYPE_CONTAINER_RM;
 extern const char *MEDIA_MIMETYPE_CONTAINER_FLV;
 extern const char *MEDIA_MIMETYPE_CONTAINER_MOV;
-
 //	Video
 extern const char *MEDIA_MIMETYPE_VIDEO_WMV;
 extern const char *MEDIA_MIMETYPE_VIDEO_RV;
@@ -85,12 +84,8 @@ extern const char *MEDIA_MIMETYPE_AUDIO_RA;
 extern const char *MEDIA_MIMETYPE_AUDIO_WMA;
 extern const char *MEDIA_MIMETYPE_AUDIO_APE;
 extern const char *MEDIA_MIMETYPE_AUDIO_DTS;
-
 //
 //////////////////////////////////////////////////////////////////////////////
-
-
-
 }  // namespace android
 
 #endif  // MEDIA_DEFS_H_

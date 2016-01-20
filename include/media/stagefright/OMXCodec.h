@@ -242,6 +242,7 @@ private:
 
     void setComponentRole();
 
+
 	//  Added  2013_07_18
 #if 1
 	void setAC3Format(int32_t numChannels, int32_t sampleRate, int32_t bitRate);
@@ -251,7 +252,6 @@ private:
     void setWMAFormat(int32_t numChannels, int32_t sampleRate, int32_t blockAlign, int32_t bitRate, int32_t version);
 	void setMPGAuidoFormat(int32_t numChannels, int32_t sampleRate);
 #endif
-
     void setAMRFormat(bool isWAMR, int32_t bitRate);
 
     status_t setAACFormat(

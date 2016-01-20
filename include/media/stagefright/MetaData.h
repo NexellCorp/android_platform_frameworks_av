@@ -134,6 +134,7 @@ enum {
     kKeyRequiresSecureBuffers = 'secu',  // bool (int32_t)
 
     kKeyIsADTS            = 'adts',  // bool (int32_t)
+    kKeyAACAOT            = 'aaot',  // int32_t
 
     // If a MediaBuffer's data represents (at least partially) encrypted
     // data, the following fields aid in decryption.
@@ -162,11 +163,6 @@ enum {
 
     kKeyPssh              = 'pssh',  // raw data
 };
-
-
-//
-//	For Nexell FFMPEG Extractor
-//
 enum {
 	kKeyRawCodecSpecificData = 'rcsd',
 	kKeyWMVVersion           = 'wmvv',
@@ -177,12 +173,10 @@ enum {
 	kTypeWMA                 = 'wma ',
 	kTypeWMAPro              = 'wmap',
 	kTypeWMALossLess         = 'wmal',
-
     kKeyRVVersion            = 'rvvr',
     kTypeRVVer_G2            = 'rvG2',
     kTypeRVVer_8             = 'rvv8',
     kTypeRVVer_9             = 'rvv9',
-
 	kKeyBitspersample        = 'bpsp',
 	kKeyBlockAlign           = 'baln',
 	kKeyFFCodecTag           = 'ffct',

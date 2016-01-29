@@ -387,18 +387,25 @@ VideoFrame *StagefrightMetadataRetriever::getFrameAtTime(
         memcpy(mAlbumArt->mData, data, dataSize);
     }
 
+#if 0
     VideoFrame *frame =
         extractVideoFrameWithCodecFlags(
                 &mClient, trackMeta, source, OMXCodec::kPreferSoftwareCodecs,
                 timeUs, option);
 
-    if (frame == NULL) {
-        ALOGV("Software decoder failed to extract thumbnail, "
-             "trying hardware decoder.");
+     if (frame == NULL) {
+         ALOGV("Software decoder failed to extract thumbnail, "
+              "trying hardware decoder.");
 
-        frame = extractVideoFrameWithCodecFlags(&mClient, trackMeta, source, 0,
+    
+      frame = extractVideoFrameWithCodecFlags(&mClient, trackMeta, source, 0,
                         timeUs, option);
     }
+#else    
+     VideoFrame *frame; 
+        frame = extractVideoFrameWithCodecFlags(&mClient, trackMeta, source, 0,
+                        timeUs, option);
+#endif        
 
     return frame;
 }

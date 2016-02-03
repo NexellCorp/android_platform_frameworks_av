@@ -689,7 +689,7 @@ status_t OMXCodec::configureCodec(const sp<MetaData> &meta) {
         CHECK(meta->findInt32(kKeyChannelCount, &numChannels));
         CHECK(meta->findInt32(kKeySampleRate, &sampleRate));
         meta->findInt32(kKeyBitRate, &bitRate);
-        setAC3Format(numChannels, sampleRate);
+        setAC3FormatNexell(numChannels, sampleRate);
     }
 	else if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_DTS, mMIME)) {
 		CHECK(meta->findInt32(kKeyChannelCount, &numChannels));
@@ -3825,6 +3825,21 @@ void OMXCodec::setMPGAuidoFormat(int32_t numChannels, int32_t sampleRate)
     err = mOMX->setParameter( mNode, (OMX_INDEXTYPE)OMX_IndexParamAudioMp3, &profile, sizeof(profile));
     CHECK_EQ(err, (status_t)OK);
 }
+
+void OMXCodec::setAC3FormatNexell(int32_t numChannels, int32_t sampleRate)
+{
+    OMX_AUDIO_PARAM_AC3TYPE profile;
+    InitOMXParams(&profile);
+    profile.nPortIndex = kPortIndexInput;
+    status_t err = mOMX->getParameter(mNode, (OMX_INDEXTYPE)OMX_IndexParamAudioAc3, &profile, sizeof(profile));
+    CHECK_EQ(err, (status_t)OK);
+
+    profile.nChannels = numChannels;
+    profile.nSampleRate = sampleRate;
+    err = mOMX->setParameter( mNode, (OMX_INDEXTYPE)OMX_IndexParamAudioAc3, &profile, sizeof(profile));
+    CHECK_EQ(err, (status_t)OK);
+}
+
 
 #endif
 

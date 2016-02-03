@@ -249,6 +249,7 @@ private:
 	void setRAFormat(int32_t numChannels, int32_t sampleRate, int32_t bitsPerFrame, int32_t bitRate);
 	void setWMAFormat(int32_t numChannels, int32_t sampleRate, int32_t blockAlign, int32_t bitRate, int32_t version);
 	void setMPGAuidoFormat(int32_t numChannels, int32_t sampleRate);
+    void setAC3FormatNexell(int32_t numChannels, int32_t sampleRate);
 #endif
 
     void setAMRFormat(bool isWAMR, int32_t bitRate);

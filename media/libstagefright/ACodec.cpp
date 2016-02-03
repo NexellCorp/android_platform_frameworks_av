@@ -2201,12 +2201,12 @@ status_t ACodec::setupAC3CodecNexell(bool encoder, int32_t numChannels, int32_t 
     }
 
     if (encoder) {
-        ALOGW("DTS encoding is not supported.");
+        ALOGW("AC3 encoding is not supported.");
         return INVALID_OPERATION;
     }
 
-    OMX_AUDIO_PARAM_DTSTYPE def;
-    def.nSize = sizeof(OMX_AUDIO_PARAM_DTSTYPE);
+    OMX_AUDIO_PARAM_AC3TYPE def;
+    def.nSize = sizeof(OMX_AUDIO_PARAM_AC3TYPE);
     def.nVersion.s.nVersionMajor = 1;
     def.nVersion.s.nVersionMinor = 0;
     def.nVersion.s.nRevision = 0;
@@ -2216,7 +2216,7 @@ status_t ACodec::setupAC3CodecNexell(bool encoder, int32_t numChannels, int32_t 
     def.nPortIndex = kPortIndexInput;
     err = mOMX->getParameter(
             mNode,
-            (OMX_INDEXTYPE)OMX_IndexParamAudioDTS,
+            (OMX_INDEXTYPE)OMX_IndexParamAudioAc3,
             &def,
             sizeof(def));
 
@@ -2228,7 +2228,7 @@ status_t ACodec::setupAC3CodecNexell(bool encoder, int32_t numChannels, int32_t 
     def.nSampleRate = sampleRate;
     return mOMX->setParameter(
             mNode,
-            (OMX_INDEXTYPE)OMX_IndexParamAudioDTS,
+            (OMX_INDEXTYPE)OMX_IndexParamAudioAc3,
             &def,
             sizeof(def));
 }

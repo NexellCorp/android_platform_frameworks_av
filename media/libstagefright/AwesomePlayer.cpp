@@ -75,7 +75,7 @@ static const size_t kHighWaterMarkBytes = 200000;
 
 // maximum time in paused state when offloading audio decompression. When elapsed, the AudioPlayer
 // is destroyed to allow the audio DSP to power down.
-static int64_t kOffloadPauseMaxUs = 10000000ll;
+static int64_t kOffloadPauseMaxUs = 60000000ll;
 
 
 struct AwesomeEvent : public TimedEventQueue::Event {
@@ -1221,6 +1221,9 @@ void AwesomePlayer::initRenderer_l() {
     CHECK(meta->findInt32(kKeyWidth, &decodedWidth));
     CHECK(meta->findInt32(kKeyHeight, &decodedHeight));
 
+    meta->setInt32(kKeyStride, decodedWidth);  
+    meta->setInt32(kKeySliceHeight, decodedHeight);  
+
     int32_t rotationDegrees;
     if (!mVideoTrack->getFormat()->findInt32(
                 kKeyRotation, &rotationDegrees)) {
@@ -1936,7 +1939,7 @@ void AwesomePlayer::onVideoEvent() {
         latenessUs = nowUs - timeUs;
 
         ATRACE_INT("Video Lateness (ms)", latenessUs / 1E3);
-
+#if 0   // Delete by Ray Park : Pause/Play/Pause/Play Problem.
         if (latenessUs > 500000ll
                 && mAudioPlayer != NULL
                 && mAudioPlayer->getMediaTimeMapping(
@@ -1960,7 +1963,7 @@ void AwesomePlayer::onVideoEvent() {
                 ALOGI("we're very late (%.2f secs)", latenessUs / 1E6);
             }
         }
-
+#endif
         if (latenessUs > 40000) {
             // We're more than 40ms late.
             ALOGV("we're late by %" PRId64 " us (%.2f secs)",

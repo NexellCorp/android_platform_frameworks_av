@@ -708,7 +708,7 @@ status_t OMXCodec::configureCodec(const sp<MetaData> &meta) {
 		CHECK(meta->findInt32(kKeyChannelCount, &numChannels));
 		CHECK(meta->findInt32(kKeySampleRate, &sampleRate));
 		CHECK(meta->findInt32(kKeyBlockAlign, &blockAlign));
-		setRAFormat(numChannels, sampleRate, blockAlign*8, bitRate);
+        setRAFormat(numChannels, sampleRate, blockAlign, bitRate);
      }
     else if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_WMA, mMIME)) {
         int32_t blockAlign, version = 0;

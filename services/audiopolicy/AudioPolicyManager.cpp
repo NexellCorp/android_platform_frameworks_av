@@ -3287,8 +3287,12 @@ AudioPolicyManager::AudioPolicyManager(AudioPolicyClientInterface *clientInterfa
 #ifdef ENABLE_DUAL_AUDIO
     NX_IDualAudio *pDualAudio = GetDualAudioInstance();
     if( pDualAudio ) {
+        pDualAudio->ChangeDebugLevel( 3 );
+#ifdef ENABLE_DUAL_AUDIO_PATH_HDMI
+        pDualAudio->SetConfig( 2, 0, AUDIO_CHANNEL_OUT_STEREO, 48000, AUDIO_FORMAT_PCM_SUB_16_BIT );
+#else
         pDualAudio->SetConfig( 1, 0, AUDIO_CHANNEL_OUT_STEREO, 48000, AUDIO_FORMAT_PCM_SUB_16_BIT );
-        //pDualAudio->ChangeDebugLevel( 0 );
+#endif
     }
 #endif
 }

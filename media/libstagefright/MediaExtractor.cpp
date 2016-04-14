@@ -97,7 +97,7 @@ sp<MediaExtractor> MediaExtractor::Create(
     ALOGI("Autodetected media content as '%s' with confidence %.2f", mime, confidence);
     MediaExtractor *ret = NULL;
 
-#if 1
+#if 1 // codec limit
 #ifdef ENABLE_FFMPEG_EXTRACTOR
     if (!strcasecmp(mime, "audio/mp4")) {
         ret = new FFmpegExtractor(source);
@@ -129,8 +129,8 @@ sp<MediaExtractor> MediaExtractor::Create(
     } else if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_WVM)) {
         // Return now.  WVExtractor should not have the DrmFlag set in the block below.
         return new WVMExtractor(source);
-    // } else if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_AAC_ADTS)) {
-    //     ret = new AACExtractor(source, meta);
+    } else if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_AAC_ADTS)) {
+         ret = new AACExtractor(source, meta);
     } 
     // else if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_MPEG2TS)) {
     //     ret = new FFmpegExtractor(source);
@@ -138,7 +138,7 @@ sp<MediaExtractor> MediaExtractor::Create(
     //     ret = new FFmpegExtractor(source);
     // }
 #endif    
-#else
+#else // codec limit
     if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_MPEG4)
             || !strcasecmp(mime, "audio/mp4")) {
         ret = new MPEG4Extractor(source);
@@ -150,7 +150,7 @@ sp<MediaExtractor> MediaExtractor::Create(
             ret = new FFmpegExtractor(source);
         }
 #endif
-    } else if (!strcasecmp(mime, "audio/mp4")) {
+    } else if (!strcasecmp(mime, "audio/mp4")) {a
         ret = new MPEG4Extractor(source);
 #ifdef ENABLE_FFMPEG_EXTRACTOR   //  Added by Ray Park for FFMPEG Extractor 
     }else if ( !strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_AVI) ){
@@ -205,7 +205,7 @@ sp<MediaExtractor> MediaExtractor::Create(
         ret = new MPEG2TSExtractor(source);
 #endif
     }
-#endif    
+#endif   //codec limit
 
     if (ret != NULL) {
        if (isDrm) {

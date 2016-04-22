@@ -100,7 +100,7 @@ struct ANetworkSession::Session : public RefBase {
     status_t writeMore();
 
     status_t sendRequest(
-            const void *data, ssize_t size, bool timeValid, int64_t timeUs);
+            const void *data, ssize_t size, bool timeValid, int64_t timeUs, bool stream = false);	// by sapark add stream
 
     void setMode(Mode mode);
 
@@ -266,8 +266,6 @@ bool ANetworkSession::Session::wantsToWrite() {
 }
 
 status_t ANetworkSession::Session::readMore() {
-    // psw0523 debugging
-    // ALOGD("session %d, socket %d readMore: mState 0x%x", sessionID(), mSocket, mState);
     if (mState == DATAGRAM) {
         CHECK_EQ(mMode, MODE_DATAGRAM);
 
@@ -691,7 +689,7 @@ status_t ANetworkSession::Session::writeMore() {
 }
 
 status_t ANetworkSession::Session::sendRequest(
-        const void *data, ssize_t size, bool timeValid, int64_t timeUs) {
+        const void *data, ssize_t size, bool timeValid, int64_t timeUs, bool stream) {
     CHECK(mState == CONNECTED || mState == DATAGRAM);
 
     if (size < 0) {
@@ -703,8 +701,13 @@ status_t ANetworkSession::Session::sendRequest(
     }
 
     sp<ABuffer> buffer;
-
-    if (mState == CONNECTED && mMode == MODE_DATAGRAM) {
+	
+	// by sapark
+	if (mState == CONNECTED && mMode == MODE_DATAGRAM && stream){
+		buffer = new ABuffer(size);
+        memcpy(buffer->data(), data, size);
+	}
+    else if (mState == CONNECTED && mMode == MODE_DATAGRAM) {
         CHECK_LE(size, 65535);
 
         buffer = new ABuffer(size + 2);
@@ -1000,6 +1003,10 @@ status_t ANetworkSession::createClientOrServer(
     if (mode == kModeCreateUDPSession) {
         int size = 256 * 1024;
 
+        //lesc0.
+        const int yes = 1;
+        setsockopt(s, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(yes));
+
         res = setsockopt(s, SOL_SOCKET, SO_RCVBUF, &size, sizeof(size));
 
         if (res < 0) {
@@ -1206,7 +1213,7 @@ status_t ANetworkSession::connectUDPSession(
 
 status_t ANetworkSession::sendRequest(
         int32_t sessionID, const void *data, ssize_t size,
-        bool timeValid, int64_t timeUs) {
+        bool timeValid, int64_t timeUs, bool stream) {
     Mutex::Autolock autoLock(mLock);
 
     ssize_t index = mSessions.indexOfKey(sessionID);
@@ -1217,7 +1224,8 @@ status_t ANetworkSession::sendRequest(
 
     const sp<Session> session = mSessions.valueAt(index);
 
-    status_t err = session->sendRequest(data, size, timeValid, timeUs);
+	// by sapark
+    status_t err = session->sendRequest(data, size, timeValid, timeUs, stream);
 
     interrupt();
 
@@ -1271,8 +1279,6 @@ void ANetworkSession::threadLoop() {
             }
 
             if (session->wantsToRead()) {
-                // psw0523 debugging
-                // ALOGD("session %d added to FD_SET: fd %d", session->sessionID(), s);
                 FD_SET(s, &rs);
                 if (s > maxFd) {
                     maxFd = s;
@@ -1336,8 +1342,6 @@ void ANetworkSession::threadLoop() {
             }
 
             if (FD_ISSET(s, &rs)) {
-                // psw0523 debugging
-                // ALOGD("socket %d is read set", s);
                 if (session->isRTSPServer() || session->isTCPDatagramServer()) {
                     struct sockaddr_in remoteAddr;
                     socklen_t remoteAddrLen = sizeof(remoteAddr);
@@ -1367,24 +1371,12 @@ void ANetworkSession::threadLoop() {
                                   ntohs(remoteAddr.sin_port),
                                   clientSocket);
 
-                            // psw0523 patch for UIBC
-#if 0
                             sp<Session> clientSession =
                                 new Session(
                                         mNextSessionID++,
                                         Session::CONNECTED,
                                         clientSocket,
                                         session->getNotificationMessage());
-#else
-                            sp<Session> clientSession =
-                                new Session(
-                                        mNextSessionID++,
-                                        session->isRTSPServer()
-                                        ? Session::CONNECTED
-                                        : Session::DATAGRAM,
-                                        clientSocket,
-                                        session->getNotificationMessage());
-#endif
 
                             clientSession->setMode(
                                     session->isRTSPServer()

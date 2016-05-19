@@ -1001,6 +1001,9 @@ status_t ACodec::setComponentRole(
             "audio_decoder.flac", "audio_encoder.flac" },
         { MEDIA_MIMETYPE_AUDIO_MSGSM,
             "audio_decoder.gsm", "audio_encoder.gsm" },
+
+        { MEDIA_MIMETYPE_VIDEO_HEVC,
+            "video_decoder.hevc", "video_encoder.hevc" },
     };
 
     static const size_t kNumMimeToRole =

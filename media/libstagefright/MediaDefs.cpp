@@ -73,4 +73,7 @@ const char *MEDIA_MIMETYPE_AUDIO_RA = "audio/ra";
 const char *MEDIA_MIMETYPE_AUDIO_WMA = "audio/x-ms-wma";
 const char *MEDIA_MIMETYPE_AUDIO_APE = "audio/ape";
 const char *MEDIA_MIMETYPE_AUDIO_DTS = "audio/dts";
+
+const char *MEDIA_MIMETYPE_VIDEO_HEVC = "video/hevc";	// Added by RayPark 20160507
+
 }  // namespace android

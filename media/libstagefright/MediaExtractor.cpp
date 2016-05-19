@@ -131,12 +131,11 @@ sp<MediaExtractor> MediaExtractor::Create(
         return new WVMExtractor(source);
     } else if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_AAC_ADTS)) {
          ret = new AACExtractor(source, meta);
-    } 
-    // else if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_MPEG2TS)) {
+    } else if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_MPEG2TS)) {
+        ret = new FFmpegExtractor(source);
+    //} else if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_MPEG2PS)) {
     //     ret = new FFmpegExtractor(source);
-    // } else if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_MPEG2PS)) {
-    //     ret = new FFmpegExtractor(source);
-    // }
+    }
 #endif    
 #else // codec limit
     if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_MPEG4)

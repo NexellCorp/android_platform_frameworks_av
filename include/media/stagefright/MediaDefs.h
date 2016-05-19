@@ -78,6 +78,8 @@ extern const char *MEDIA_MIMETYPE_VIDEO_FLV;
 extern const char *MEDIA_MIMETYPE_VIDEO_MP43;
 extern const char *MEDIA_MIMETYPE_VIDEO_DIV3;
 
+extern const char *MEDIA_MIMETYPE_VIDEO_HEVC;	//	Added by RayPark 20160507
+
 //	Audo
 extern const char *MEDIA_MIMETYPE_AUDIO_AC3;
 extern const char *MEDIA_MIMETYPE_AUDIO_RA;

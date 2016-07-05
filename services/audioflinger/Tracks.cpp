@@ -621,6 +621,14 @@ status_t AudioFlinger::PlaybackThread::Track::getNextBuffer(
     buffer->raw = buf.mRaw;
     if (buf.mFrameCount == 0) {
         mAudioTrackServerProxy->tallyUnderrunFrames(desiredFrames);
+
+#ifdef ENABLE_DUAL_AUDIO
+        if( mStreamType == AUDIO_STREAM_EXT_SPEAKER ) {
+            NX_IDualAudio *pDualAudio = GetDualAudioInstance();
+            if( pDualAudio ) pDualAudio->Flush( sessionId() );
+            return status;
+        }
+#endif
     }
 
 #ifdef ENABLE_DUAL_AUDIO

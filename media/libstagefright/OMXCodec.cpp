@@ -347,6 +347,33 @@ sp<MediaSource> OMXCodec::Create(
             }
         }
 
+        // Added by RayPark for AAC 5.1Channel
+        if( !strcasecmp( mime, MEDIA_MIMETYPE_AUDIO_AAC) )
+        {
+            int32_t numChannels, sampleRate;
+            meta->findInt32(kKeyChannelCount, &numChannels);
+            meta->findInt32(kKeySampleRate, &sampleRate);
+            ALOGD("AAC Codec : %s, numChannels(%d), sampleRate(%d)",
+                componentName, numChannels, sampleRate);
+
+            if( !strncmp(componentName, "OMX.NX.AUDIO_DECODER", 20) )
+            {
+                if( numChannels < 3 )
+                {
+                    ALOGD("~~~~~~~~ Use Android Default AAC Decoder ~~~~~~~~");
+                    continue;
+                }
+            }
+            else
+            {
+                if( numChannels > 2 )
+                {
+                    ALOGD("~~~~~~~~ Use Android External AAC Decoder ~~~~~~~~");
+                    continue;
+                }
+            }
+        }
+
         status_t err = omx->allocateNode(componentName, observer, &node);
         if (err == OK) {
             ALOGV("Successfully allocated OMX node '%s'", componentName);

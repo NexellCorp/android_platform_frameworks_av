@@ -350,9 +350,10 @@ sp<MediaSource> OMXCodec::Create(
         // Added by RayPark for AAC 5.1Channel
         if( !strcasecmp( mime, MEDIA_MIMETYPE_AUDIO_AAC) )
         {
-            int32_t numChannels, sampleRate;
+            int32_t numChannels, sampleRate, aacProfile;
             meta->findInt32(kKeyChannelCount, &numChannels);
             meta->findInt32(kKeySampleRate, &sampleRate);
+            meta->findInt32(kKeyAACProfile, &aacProfile);
             ALOGD("AAC Codec : %s, numChannels(%d), sampleRate(%d)",
                 componentName, numChannels, sampleRate);
 
@@ -361,6 +362,12 @@ sp<MediaSource> OMXCodec::Create(
                 if( numChannels < 3 )
                 {
                     ALOGD("~~~~~~~~ Use Android Default AAC Decoder ~~~~~~~~");
+                    continue;
+                }
+                // Check Profile
+                if( aacProfile == OMX_AUDIO_AACObjectMain || aacProfile == OMX_AUDIO_AACObjectSSR )
+                {
+                    ALOGW("Unsupported AAC Profile !!!!");
                     continue;
                 }
             }

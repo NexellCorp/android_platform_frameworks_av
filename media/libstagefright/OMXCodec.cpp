@@ -543,25 +543,30 @@ status_t OMXCodec::configureCodec(const sp<MetaData> &meta) {
 						CODEC_LOGE("setParameter('OMX.NX.VIDEO_DECODER.Extradata') returned error 0x%08x", err);
 						return OMX_ErrorNotImplemented;
 					}
-    }
-				else if ( !strncmp(mComponentName, "OMX.NX.AUDIO_DECODER.FFMPEG", 27 ) )
-				{
-					OMX_INDEXTYPE index;
-					status_t err = mOMX->getExtensionIndex( mNode, "OMX.NX.AUDIO_DECODER.FFMPEG.Extradata", &index);
-					if (err != OK) {
-						CODEC_LOGE("getExtensionIndex('OMX.NX.AUDIO_DECODER.FFMPEG.Extradata') returned error 0x%08x", err);
-						return OMX_ErrorNotImplemented;
-					}
-
-					uint8_t *extData = new uint8_t[size + 4];
-					*((int32_t*)extData) = size;
-					memcpy( extData+4, data, size );
-					err = mOMX->setParameter(mNode, index, extData, size+4);
-					delete []extData;
-					if (err != OK) {
-						CODEC_LOGE("setParameter('OMX.NX.AUDIO_DECODER.FFMPEG.Extradata') returned error 0x%08x", err);
-						return OMX_ErrorNotImplemented;
-					}
+                }
+			}
+		}
+		// Seperate FFMPEG audio extra information processing uint for aac decoder
+		// AAC decoder co-exist ESDS & FFMPEG Extra information
+		if( meta->findData(kKeyRawCodecSpecificData, &type, &data, &size) && 
+			!strncmp(mComponentName, "OMX.NX.AUDIO_DECODER.FFMPEG", 27 ) )
+		{
+			OMX_INDEXTYPE index;
+			status_t err = mOMX->getExtensionIndex( mNode, "OMX.NX.AUDIO_DECODER.FFMPEG.Extradata", &index);
+			if (err != OK) {
+				CODEC_LOGE("getExtensionIndex('OMX.NX.AUDIO_DECODER.FFMPEG.Extradata') returned error 0x%08x", err);
+				return OMX_ErrorNotImplemented;
+			}
+			if( size > 0 )
+			{
+				uint8_t *extData = new uint8_t[size + 4];
+				*((int32_t*)extData) = size;
+				memcpy( extData+4, data, size );
+				err = mOMX->setParameter(mNode, index, extData, size+4);
+				delete []extData;
+				if (err != OK) {
+					CODEC_LOGE("setParameter('OMX.NX.AUDIO_DECODER.FFMPEG.Extradata') returned error 0x%08x", err);
+					return OMX_ErrorNotImplemented;
 				}
 			}
 		}

@@ -288,6 +288,7 @@ private:
 
 #if 1 //    Added by Ray Park 20150202
     status_t setupDTSCodec(bool encoder, int32_t numChannels, int32_t sampleRate);
+    status_t setupAPECodec(bool encoder, int32_t numChannels, int32_t sampleRate);
     status_t setupAC3CodecNexell(bool encoder, int32_t numChannels, int32_t sampleRate);
     status_t setupFLACCodecNexell(bool encoder, int32_t numChannels, int32_t sampleRate);
     status_t setupRACodecNexell(bool encoder, int32_t numChannels, int32_t sampleRate, int32_t bitsPerFrame, int32_t bitRate);

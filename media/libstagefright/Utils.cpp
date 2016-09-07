@@ -706,6 +706,7 @@ static const struct mime_conv_t mimeLookup[] = {
     { MEDIA_MIMETYPE_AUDIO_RA,          AUDIO_FORMAT_DEFAULT },
     { MEDIA_MIMETYPE_AUDIO_WMA,         AUDIO_FORMAT_DEFAULT },
     { MEDIA_MIMETYPE_AUDIO_FLAC,        AUDIO_FORMAT_DEFAULT },
+    { MEDIA_MIMETYPE_AUDIO_APE,         AUDIO_FORMAT_DEFAULT },
 #endif
 
     { MEDIA_MIMETYPE_AUDIO_AAC,         AUDIO_FORMAT_AAC },

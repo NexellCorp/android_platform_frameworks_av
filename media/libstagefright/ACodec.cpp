@@ -56,10 +56,12 @@ namespace android {
 #define OMX_IndexParamAudioAc3  (OMX_IndexVendorStartUnused + 0xE0000 + 0x00)
 #define OMX_IndexParamAudioDTS  (OMX_IndexVendorStartUnused + 0xE0000 + 0x01)
 #define OMX_IndexParamAudioFLAC (OMX_IndexVendorStartUnused + 0xE0000 + 0x02)
+#define OMX_IndexParamAudioAPE  (OMX_IndexVendorStartUnused + 0xE0000 + 0x03)
 
 #define OMX_AUDIO_CodingAC3     (OMX_AUDIO_CodingVendorStartUnused + 0xE0000 + 0x00)
 #define OMX_AUDIO_CodingDTS     (OMX_AUDIO_CodingVendorStartUnused + 0xE0000 + 0x01)
 #define OMX_AUDIO_CodingFLAC    (OMX_AUDIO_CodingVendorStartUnused + 0xE0000 + 0x02)
+#define OMX_AUDIO_CodingAPE     (OMX_AUDIO_CodingVendorStartUnused + 0xE0000 + 0x03)
 #endif
 
 // OMX errors are directly mapped into status_t range if
@@ -1150,6 +1152,8 @@ status_t ACodec::setComponentRole(
              "audio_decoder.ra", "audio_encoder.ra" },
         { MEDIA_MIMETYPE_AUDIO_WMA,
              "audio_decoder.x-ms-wma", "audio_encoder.x-ms-wma" },
+        { MEDIA_MIMETYPE_AUDIO_APE,
+             "audio_decoder.ape", "audio_encoder.ape" },
 #endif
 
     };
@@ -1639,6 +1643,12 @@ status_t ACodec::configureCodec(
         CHECK(msg->findInt32("channel-count", &numChannels));
         CHECK(msg->findInt32("sample-rate", &sampleRate));
         setupDTSCodec(encoder, numChannels, sampleRate);
+    } else if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_APE)) {
+        int32_t numChannels;
+        int32_t sampleRate;
+        CHECK(msg->findInt32("channel-count", &numChannels));
+        CHECK(msg->findInt32("sample-rate", &sampleRate));
+        setupAPECodec(encoder, numChannels, sampleRate);
     } else if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_WMA)) {
         int32_t numChannels;
         int32_t sampleRate;
@@ -2184,6 +2194,15 @@ typedef struct OMX_AUDIO_PARAM_DTSTYPE {
     OMX_U32 nSampleRate;
 } OMX_AUDIO_PARAM_DTSTYPE;
 
+typedef struct OMX_AUDIO_PARAM_APETYPE {
+    OMX_U32 nSize;
+    OMX_VERSIONTYPE nVersion;
+    OMX_U32 nPortIndex;
+    OMX_U32 nChannels;
+    OMX_U32 nBitRate;
+    OMX_U32 nSampleRate;
+} OMX_AUDIO_PARAM_APETYPE;
+
 typedef struct OMX_AUDIO_PARAM_NX_FLACTYPE{
     OMX_U32 nSize;
     OMX_VERSIONTYPE nVersion;
@@ -2309,6 +2328,46 @@ status_t ACodec::setupDTSCodec(bool encoder, int32_t numChannels, int32_t sample
     return mOMX->setParameter(
             mNode,
             (OMX_INDEXTYPE)OMX_IndexParamAudioDTS,
+            &def,
+            sizeof(def));
+}
+
+status_t ACodec::setupAPECodec(bool encoder, int32_t numChannels, int32_t sampleRate)
+{
+    status_t err = setupRawAudioFormat( encoder ? kPortIndexInput : kPortIndexOutput, sampleRate, numChannels);
+    if (err != OK) {
+        return err;
+    }
+
+    if (encoder) {
+        ALOGW("APE encoding is not supported.");
+        return INVALID_OPERATION;
+    }
+
+    OMX_AUDIO_PARAM_APETYPE def;
+    def.nSize = sizeof(OMX_AUDIO_PARAM_APETYPE);
+    def.nVersion.s.nVersionMajor = 1;
+    def.nVersion.s.nVersionMinor = 0;
+    def.nVersion.s.nRevision = 0;
+    def.nVersion.s.nStep = 0;
+
+    InitOMXParams(&def);
+    def.nPortIndex = kPortIndexInput;
+    err = mOMX->getParameter(
+            mNode,
+            (OMX_INDEXTYPE)OMX_IndexParamAudioAPE,
+            &def,
+            sizeof(def));
+
+    if (err != OK) {
+        return err;
+    }
+
+    def.nChannels = numChannels;
+    def.nSampleRate = sampleRate;
+    return mOMX->setParameter(
+            mNode,
+            (OMX_INDEXTYPE)OMX_IndexParamAudioAPE,
             &def,
             sizeof(def));
 }
@@ -4337,6 +4396,21 @@ status_t ACodec::getPortFormat(OMX_U32 portIndex, sp<AMessage> &notify) {
                     notify->setInt32("sample-rate", params.nSampleRate);
                     break;
                 }
+                case OMX_AUDIO_CodingAPE:    //   Nexell APE
+                {
+                    OMX_AUDIO_PARAM_DTSTYPE params;
+                    InitOMXParams(&params);
+                    params.nPortIndex = portIndex;
+                    CHECK_EQ((status_t)OK, mOMX->getParameter(
+                            mNode,
+                            (OMX_INDEXTYPE)OMX_IndexParamAudioAPE,
+                            &params,
+                            sizeof(params)));
+                    notify->setString("mime", MEDIA_MIMETYPE_AUDIO_APE);
+                    notify->setInt32("channel-count", params.nChannels);
+                    notify->setInt32("sample-rate", params.nSampleRate);
+                    break;
+                }                
                 case OMX_AUDIO_CodingAC3:    //   Nexell AC3
                 {
                     OMX_AUDIO_PARAM_AC3TYPE params;

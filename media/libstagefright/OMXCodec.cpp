@@ -697,6 +697,12 @@ status_t OMXCodec::configureCodec(const sp<MetaData> &meta) {
 		meta->findInt32(kKeyBitRate, &bitRate);
 		setDTSFormat(numChannels, sampleRate, bitRate);
 	}
+    else if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_APE, mMIME)) {
+        CHECK(meta->findInt32(kKeyChannelCount, &numChannels));
+        CHECK(meta->findInt32(kKeySampleRate, &sampleRate));
+        meta->findInt32(kKeyBitRate, &bitRate);
+        setAPEFormat(numChannels, sampleRate, bitRate);
+    }
 	else if (!strcasecmp(MEDIA_MIMETYPE_AUDIO_FLAC, mMIME) && !strncmp(mComponentName, "OMX.NX.",7) ) {
 		CHECK(meta->findInt32(kKeyChannelCount, &numChannels));
 		CHECK(meta->findInt32(kKeySampleRate, &sampleRate));
@@ -1682,6 +1688,8 @@ void OMXCodec::setComponentRole(
              "audio_decoder.ra", "audio_encoder.ra" },
 		{ MEDIA_MIMETYPE_AUDIO_WMA,
              "audio_decoder.x-ms-wma", "audio_encoder.x-ms-wma" },
+        { MEDIA_MIMETYPE_AUDIO_APE,
+             "audio_decoder.ape", "audio_encoder.ape" },
 #endif
         { MEDIA_MIMETYPE_AUDIO_MPEG,
             "audio_decoder.mp3", "audio_encoder.mp3" },
@@ -3706,10 +3714,12 @@ static OMX_AUDIO_AMRBANDMODETYPE pickModeFromBitRate(bool isAMRWB, int32_t bps) 
 #define OMX_IndexParamAudioAc3  (OMX_IndexVendorStartUnused + 0xE0000 + 0x00)
 #define OMX_IndexParamAudioDTS  (OMX_IndexVendorStartUnused + 0xE0000 + 0x01)
 #define OMX_IndexParamAudioFLAC (OMX_IndexVendorStartUnused + 0xE0000 + 0x02)
+#define OMX_IndexParamAudioAPE  (OMX_IndexVendorStartUnused + 0xE0000 + 0x03)
 
 #define OMX_AUDIO_CodingAC3     (OMX_AUDIO_CodingVendorStartUnused + 0xE0000 + 0x00)
 #define OMX_AUDIO_CodingDTS     (OMX_AUDIO_CodingVendorStartUnused + 0xE0000 + 0x01)
 #define OMX_AUDIO_CodingFLAC    (OMX_AUDIO_CodingVendorStartUnused + 0xE0000 + 0x02)
+#define OMX_AUDIO_CodingAPE     (OMX_AUDIO_CodingVendorStartUnused + 0xE0000 + 0x03)
 
 typedef struct OMX_AUDIO_PARAM_AC3TYPE{
 	OMX_U32 nSize;
@@ -3728,6 +3738,15 @@ typedef struct OMX_AUDIO_PARAM_DTSTYPE{
 	OMX_U32 nBitRate;
 	OMX_U32 nSampleRate;
 } OMX_AUDIO_PARAM_DTSTYPE;
+
+typedef struct OMX_AUDIO_PARAM_APETYPE{
+    OMX_U32 nSize;
+    OMX_VERSIONTYPE nVersion;
+    OMX_U32 nPortIndex;
+    OMX_U32 nChannels;
+    OMX_U32 nBitRate;
+    OMX_U32 nSampleRate;
+} OMX_AUDIO_PARAM_APETYPE;
 
 typedef struct OMX_AUDIO_PARAM_FLACTYPE{
 	OMX_U32 nSize;
@@ -3752,6 +3771,22 @@ void OMXCodec::setDTSFormat(int32_t numChannels, int32_t sampleRate, int32_t bit
 
 	err = mOMX->setParameter( mNode, (OMX_INDEXTYPE)OMX_IndexParamAudioDTS, &profile, sizeof(profile));
 	CHECK_EQ(err, (status_t)OK);
+}
+
+void OMXCodec::setAPEFormat(int32_t numChannels, int32_t sampleRate, int32_t bitRate)
+{
+    OMX_AUDIO_PARAM_APETYPE profile;
+    InitOMXParams(&profile);
+    profile.nPortIndex = kPortIndexInput;
+    status_t err = mOMX->getParameter(mNode, (OMX_INDEXTYPE)OMX_IndexParamAudioAPE, &profile, sizeof(profile));
+    CHECK_EQ(err, (status_t)OK);
+
+    profile.nChannels = numChannels;
+    profile.nSampleRate = sampleRate;
+    profile.nBitRate = bitRate;
+
+    err = mOMX->setParameter( mNode, (OMX_INDEXTYPE)OMX_IndexParamAudioAPE, &profile, sizeof(profile));
+    CHECK_EQ(err, (status_t)OK);
 }
 
 void OMXCodec::setFLACFormat(int32_t numChannels, int32_t sampleRate, int32_t bitRate)

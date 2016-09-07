@@ -103,6 +103,8 @@ sp<MediaExtractor> MediaExtractor::Create(
         ret = new FFmpegExtractor(source);
     } else if (!strcasecmp(mime, "audio/mp4")) {
         ret = new MPEG4Extractor(source);
+    } else if (!strcasecmp(mime, "audio/ape")) {        
+        ret = new FFmpegExtractor(source);
     }else if ( !strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_AVI) ){
         ret = new FFmpegExtractor(source);
     }else if ( !strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_WMV) ){

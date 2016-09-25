@@ -1137,6 +1137,10 @@ status_t ACodec::setComponentRole(
 #if 1       //  Added By Ray Park 20150205
         { MEDIA_MIMETYPE_VIDEO_WMV,
              "video_decoder.x-ms-wmv", "video_encoder.x-ms-wmv" },
+        { MEDIA_MIMETYPE_VIDEO_WVC1,
+            "video_decoder.wvc1", "video_encoder.wvc1" },
+        { MEDIA_MIMETYPE_VIDEO_VC1,
+            "video_decoder.vc1", "video_encoder.vc1" },
         { MEDIA_MIMETYPE_VIDEO_RV,
              "video_decoder.x-pn-realvideo", "video_encoder.x-pn-realvideo" },
         { MEDIA_MIMETYPE_VIDEO_FLV,
@@ -2844,6 +2848,8 @@ static const struct VideoCodingMapEntry {
 
 #if 1 // Added by Ray Park for Android Video Codec
     { MEDIA_MIMETYPE_VIDEO_WMV, OMX_VIDEO_CodingWMV },
+    { MEDIA_MIMETYPE_VIDEO_WVC1, OMX_VIDEO_CodingWMV },
+    { MEDIA_MIMETYPE_VIDEO_VC1, OMX_VIDEO_CodingWMV },
     { MEDIA_MIMETYPE_VIDEO_RV, OMX_VIDEO_CodingRV },
     { MEDIA_MIMETYPE_VIDEO_FLV, OMX_VIDEO_CodingMPEG4 },
     { MEDIA_MIMETYPE_VIDEO_MP43, OMX_VIDEO_CodingMPEG4 },

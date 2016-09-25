@@ -99,10 +99,18 @@ sp<MediaExtractor> MediaExtractor::Create(
 
 #ifdef ENABLE_FFMPEG_EXTRACTOR
     MediaExtractor *ret = NULL;
+#if 1 // use android default extractor for CTS
+    if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_MPEG4)
+            || !strcasecmp(mime, "audio/mp4")) {
+        ret = new MPEG4Extractor(source);
+#else // use android default extractor for mp4 audio file, use ffmpeg extractor for video file.
     if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_MPEG4)) {
         ret = new FFmpegExtractor(source);
     } else if (!strcasecmp(mime, "audio/mp4")) {
         ret = new MPEG4Extractor(source);
+#endif
+    } else if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_MPEG)) {
+        ret = new MP3Extractor(source, meta);
     } else if (!strcasecmp(mime, "audio/ape")) {        
         ret = new FFmpegExtractor(source);
     }else if ( !strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_AVI) ){
@@ -115,8 +123,6 @@ sp<MediaExtractor> MediaExtractor::Create(
         ret = new FFmpegExtractor(source);
     }else if ( !strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_ASF) ){
         ret = new FFmpegExtractor(source);
-    } else if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_MPEG)) {
-        ret = new MP3Extractor(source, meta);
     } else if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_AMR_NB)
             || !strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_AMR_WB)) {
         ret = new AMRExtractor(source);
@@ -133,8 +139,6 @@ sp<MediaExtractor> MediaExtractor::Create(
         return new WVMExtractor(source);
     } else if (!strcasecmp(mime, MEDIA_MIMETYPE_AUDIO_AAC_ADTS)) {
         ret = new AACExtractor(source, meta);
-    } else if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_MATROSKA)) {
-        ret = new FFmpegExtractor(source);
     } else if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_MPEG2TS)) {
         ret = new FFmpegExtractor(source);
     } else if (!strcasecmp(mime, MEDIA_MIMETYPE_CONTAINER_MPEG2PS)) {

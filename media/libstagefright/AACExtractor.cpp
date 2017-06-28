@@ -174,7 +174,12 @@ AACExtractor::AACExtractor(
     if (mDataSource->getSize(&streamSize) == OK) {
          while (offset < streamSize) {
             if ((frameSize = getAdtsFrameLength(source, offset, NULL)) == 0) {
-                return;
+                // Added by Seong Park 20170628
+                ALOGW("Warning frame size check error( %lldd vs %lld )", offset, streamSize);
+                if( numFrames == 0 )
+                    return;
+                else
+                    break;
             }
 
             mOffsetVector.push(offset);

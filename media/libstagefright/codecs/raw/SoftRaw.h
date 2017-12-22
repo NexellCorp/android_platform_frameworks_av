@@ -51,6 +51,9 @@ private:
     int32_t mChannelCount;
     int32_t mSampleRate;
 
+    int64_t mPrevTimeUs;
+    int64_t mPrevSampleLen;
+
     void initPorts();
     status_t initDecoder();
 

@@ -43,6 +43,8 @@ SoftRaw::SoftRaw(
       mSignalledError(false),
       mChannelCount(2),
       mSampleRate(44100) {
+    mPrevTimeUs = 0;
+    mPrevSampleLen = 0;
     initPorts();
     CHECK_EQ(initDecoder(), (status_t)OK);
 }
@@ -189,6 +191,28 @@ void SoftRaw::onQueueFilled(OMX_U32 /* portIndex */) {
         outHeader->nTimeStamp = inHeader->nTimeStamp;
 
         bool sawEOS = (inHeader->nFlags & OMX_BUFFERFLAG_EOS) != 0;
+
+        // add hcjun 2017-12-22
+        //
+        // When eos occurs
+        // If length is 0 and timestamp is 0, dummy length,timestamp is created.
+        // Because the audiotimestamp is 0 in the nurenderer(audio+video), the realtimestamp is strange.
+        //
+        if(sawEOS)
+        {
+            if(outHeader->nFilledLen == 0 && outHeader->nTimeStamp == 0)
+            {
+                int64_t smpleTimeUs = 0;
+                outHeader->nFilledLen = mPrevSampleLen;
+                memset(outHeader->pBuffer, 0, outHeader->nFilledLen);
+                smpleTimeUs = 1000000ll / mSampleRate;
+                outHeader->nTimeStamp = mPrevTimeUs + ( (outHeader->nFilledLen/mChannelCount) *smpleTimeUs);
+            }
+        }
+        if( 0 != outHeader->nTimeStamp )
+            mPrevTimeUs = outHeader->nTimeStamp;
+        if( 0 != outHeader->nFilledLen )
+            mPrevSampleLen = outHeader->nFilledLen;
 
         inQueue.erase(inQueue.begin());
         inInfo->mOwnedByUs = false;

@@ -134,6 +134,25 @@ endif
 LOCAL_CLANG := true
 LOCAL_SANITIZE := unsigned-integer-overflow signed-integer-overflow
 
+ifeq ($(EN_FFMPEG_EXTRACTOR),true)
+FFMPEG_PATH     := $(TOP)/hardware/nexell/s5pxx18/omx/codec/ffmpeg
+LOCAL_CPPFLAGS_32  += -DENABLE_FFMPEG_EXTRACTOR=1
+LOCAL_CFLAGS_32    += -D__STDC_CONSTANT_MACROS=1 -D__STDINT_LIMITS=1
+LOCAL_C_INCLUDES_32 += $(FFMPEG_PATH)/32bit/include \
+                $(TOP)/hardware/nexell/s5pxx18/omx/extractor/ffmpeg
+
+LOCAL_STATIC_LIBRARIES_32 += libNX_FFMpegExtractor
+
+LOCAL_LDFLAGS_32 += \
+        -L$(FFMPEG_PATH)/32bit/libs     \
+        -lavutil                        \
+        -lavcodec               \
+        -lavformat              \
+        -lavdevice              \
+        -lavfilter              \
+        -lswresample
+endif   # EN_FFMPEG_EXTRACTOR
+
 LOCAL_MODULE:= libstagefright
 
 LOCAL_MODULE_TAGS := optional

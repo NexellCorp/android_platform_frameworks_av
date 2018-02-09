@@ -44,6 +44,10 @@ LOCAL_MODULE_TAGS := optional
 
 LOCAL_32_BIT_ONLY := true
 
+ifeq ($(QUICKBOOT), 1)
+LOCAL_INIT_RC := drmserverq.rc
+else
 LOCAL_INIT_RC := drmserver.rc
+endif
 
 include $(BUILD_EXECUTABLE)

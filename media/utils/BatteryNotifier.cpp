@@ -184,6 +184,9 @@ void BatteryNotifier::onBatteryStatServiceDied() {
 }
 
 sp<IBatteryStats> BatteryNotifier::getBatteryService_l() {
+#ifdef QUICKBOOT
+    return nullptr;
+#else
     if (mBatteryStatService != nullptr) {
         return mBatteryStatService;
     }
@@ -214,6 +217,7 @@ sp<IBatteryStats> BatteryNotifier::getBatteryService_l() {
         // TODO: Notify for camera and flashlight state as well?
     }
     return mBatteryStatService;
+#endif
 }
 
 ANDROID_SINGLETON_STATIC_INSTANCE(BatteryNotifier);

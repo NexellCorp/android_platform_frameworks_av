@@ -34,6 +34,10 @@ LOCAL_CFLAGS += \
   -Wextra \
   -Werror \
 
+ifeq ($(QUICKBOOT), 1)
+LOCAL_CFLAGS += -DQUICKBOOT
+endif
+
 LOCAL_EXPORT_C_INCLUDE_DIRS := $(LOCAL_PATH)/include
 
 LOCAL_MODULE := libmediautils

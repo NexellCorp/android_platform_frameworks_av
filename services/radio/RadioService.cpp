@@ -51,6 +51,7 @@ RadioService::RadioService()
 
 void RadioService::onFirstRef()
 {
+#ifndef QUICKBOOT
     const hw_module_t *mod;
     int rc;
     struct radio_hw_device *dev;
@@ -90,6 +91,7 @@ void RadioService::onFirstRef()
     convertProperties(&properties, &halProperties);
     sp<Module> module = new Module(dev, properties);
     mModules.add(properties.handle, module);
+#endif
 }
 
 RadioService::~RadioService()

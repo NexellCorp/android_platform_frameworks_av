@@ -1,0 +1,6 @@
+service mediacodec /system/bin/mediacodec
+    class late_start
+    user mediacodec
+    group camera drmrpc mediadrm
+    ioprio rt 4
+    writepid /dev/cpuset/foreground/tasks

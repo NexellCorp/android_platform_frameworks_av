@@ -23,7 +23,11 @@ LOCAL_C_INCLUDES := \
     $(TOP)/frameworks/native/include/media/openmax
 LOCAL_MODULE:= mediacodec
 LOCAL_32_BIT_ONLY := true
+ifeq ($(QUICKBOOT), 1)
+LOCAL_INIT_RC := mediacodecq.rc
+else
 LOCAL_INIT_RC := mediacodec.rc
+endif
 include $(BUILD_EXECUTABLE)
 
 include $(call all-makefiles-under, $(LOCAL_PATH))

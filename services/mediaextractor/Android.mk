@@ -18,7 +18,11 @@ LOCAL_SHARED_LIBRARIES := libmedia libmediaextractorservice libbinder libutils l
 LOCAL_STATIC_LIBRARIES := libicuandroid_utils
 LOCAL_MODULE:= mediaextractor
 LOCAL_32_BIT_ONLY := true
+ifeq ($(QUICKBOOT), 1)
+LOCAL_INIT_RC := mediaextractorq.rc
+else
 LOCAL_INIT_RC := mediaextractor.rc
+endif
 LOCAL_C_INCLUDES := frameworks/av/media/libmedia
 include $(BUILD_EXECUTABLE)
 

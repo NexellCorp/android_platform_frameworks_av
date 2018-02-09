@@ -42,6 +42,10 @@ LOCAL_MULTILIB := $(AUDIOSERVER_MULTILIB)
 
 LOCAL_CFLAGS := -Wall -Werror
 
+ifeq ($(QUICKBOOT), 1)
+LOCAL_CFLAGS += -DQUICKBOOT
+endif
+
 LOCAL_MODULE:= libsoundtriggerservice
 
 include $(BUILD_SHARED_LIBRARY)

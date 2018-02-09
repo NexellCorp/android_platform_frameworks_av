@@ -54,6 +54,7 @@ SoundTriggerHwService::SoundTriggerHwService()
 
 void SoundTriggerHwService::onFirstRef()
 {
+#ifndef QUICKBOOT
     const hw_module_t *mod;
     int rc;
     sound_trigger_hw_device *dev;
@@ -91,6 +92,7 @@ void SoundTriggerHwService::onFirstRef()
     sp<Module> module = new Module(this, dev, descriptor, client);
     mModules.add(descriptor.handle, module);
     mCallbackThread = new CallbackThread(this);
+#endif
 }
 
 SoundTriggerHwService::~SoundTriggerHwService()

@@ -586,8 +586,15 @@ const uint8_t *SoftVideoEncoderOMXComponent::extractGraphicBuffer(
     void *bits = NULL;
     struct android_ycbcr ycbcr;
     status_t res;
+#if 0 //org source
     if (format == HAL_PIXEL_FORMAT_YCbCr_420_888 ||
         format != HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED) {
+#else
+    // add hcjun (2018.03.13)
+    // becase rgb format causes error.
+    if (format == HAL_PIXEL_FORMAT_YCbCr_420_888 ||
+        format == HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED) {
+#endif
         res = mapper.lockYCbCr(
                  handle,
                  GRALLOC_USAGE_SW_READ_OFTEN | GRALLOC_USAGE_SW_WRITE_NEVER,

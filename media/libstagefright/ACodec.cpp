@@ -65,7 +65,9 @@ namespace android {
 
 #define OMX_AUDIO_CodingAC3     (OMX_AUDIO_CodingVendorStartUnused + 0xE0000 + 0x00)
 #define OMX_AUDIO_CodingDTS     (OMX_AUDIO_CodingVendorStartUnused + 0xE0000 + 0x01)
+#ifdef ENABLE_FFMPEG_EXTRACTOR
 #define OMX_AUDIO_CodingFLAC    (OMX_AUDIO_CodingVendorStartUnused + 0xE0000 + 0x02)
+#endif
 #define OMX_AUDIO_CodingAPE     (OMX_AUDIO_CodingVendorStartUnused + 0xE0000 + 0x03)
 #endif
 
@@ -3176,7 +3178,7 @@ status_t ACodec::setupFLACCodecNexell(bool encoder, int32_t numChannels, int32_t
     }
 
     if (encoder) {
-        ALOGW("DTS encoding is not supported.");
+        ALOGW("FLAC encoding is not supported.");
         return INVALID_OPERATION;
     }
 
@@ -5986,7 +5988,7 @@ status_t ACodec::getPortFormat(OMX_U32 portIndex, sp<AMessage> &notify) {
                 }
                 case OMX_AUDIO_CodingFLAC:    //   Nexell FLAC
                 {
-                    OMX_AUDIO_PARAM_AC3TYPE params;
+                    OMX_AUDIO_PARAM_FLACTYPE params;
                     InitOMXParams(&params);
                     params.nPortIndex = portIndex;
                     CHECK_EQ((status_t)OK, mOMX->getParameter(
@@ -5994,7 +5996,7 @@ status_t ACodec::getPortFormat(OMX_U32 portIndex, sp<AMessage> &notify) {
                             (OMX_INDEXTYPE)OMX_IndexParamAudioAc3,
                             &params,
                             sizeof(params)));
-                    notify->setString("mime", MEDIA_MIMETYPE_AUDIO_AC3);
+                    notify->setString("mime", MEDIA_MIMETYPE_AUDIO_FLAC);
                     notify->setInt32("channel-count", params.nChannels);
                     notify->setInt32("sample-rate", params.nSampleRate);
                     break;

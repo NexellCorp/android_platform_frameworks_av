@@ -294,6 +294,14 @@ status_t AACSource::read(
     if (options && options->getSeekTo(&seekTimeUs, &mode)) {
         if (mFrameDurationUs > 0) {
             int64_t seekFrame = seekTimeUs / mFrameDurationUs;
+
+            // add hcjun 2018-08-08
+            // check bounds during seek
+            if (seekFrame < 0 || seekFrame >= (int64_t)mOffsetVector.size()) {
+                android_errorWriteLog(0x534e4554, "70239507");
+                return ERROR_MALFORMED;
+            }
+
             mCurrentTimeUs = seekFrame * mFrameDurationUs;
 
             mOffset = mOffsetVector.itemAt(seekFrame);

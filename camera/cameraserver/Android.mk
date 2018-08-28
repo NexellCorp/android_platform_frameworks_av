@@ -32,7 +32,7 @@ LOCAL_32_BIT_ONLY := true
 LOCAL_CFLAGS += -Wall -Wextra -Werror -Wno-unused-parameter
 
 ifeq ($(QUICKBOOT), 1)
-LOCAL_INIT_RC := cameraserverq.rc
+# LOCAL_INIT_RC := cameraserverq.rc
 else
 LOCAL_INIT_RC := cameraserver.rc
 endif

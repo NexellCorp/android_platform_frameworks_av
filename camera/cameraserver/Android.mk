@@ -37,6 +37,6 @@ LOCAL_32_BIT_ONLY := true
 
 LOCAL_CFLAGS += -Wall -Wextra -Werror -Wno-unused-parameter
 
-LOCAL_INIT_RC := cameraserver.rc
+# LOCAL_INIT_RC := cameraserver.rc
 
 include $(BUILD_EXECUTABLE)

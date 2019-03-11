@@ -42,5 +42,5 @@ cc_binary {
 
     compile_multilib: "32",
 
-    init_rc: ["drmserver.rc"],
+    // init_rc: ["drmserver.rc"],
 }

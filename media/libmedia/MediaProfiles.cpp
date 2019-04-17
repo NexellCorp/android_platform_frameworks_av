@@ -595,6 +595,7 @@ MediaProfiles::getInstance()
     if (!sIsInitialized) {
         char value[PROPERTY_VALUE_MAX];
         if (property_get("media.settings.xml", value, NULL) <= 0) {
+#if 0 //org source
             const char* xmlFile = nullptr;
             for (auto const& f : xmlFiles) {
                 if (checkXmlFile(f)) {
@@ -609,6 +610,20 @@ MediaProfiles::getInstance()
             } else {
                 sInstance = createInstanceFromXmlFile(xmlFile);
             }
+#else
+          // Modified By hcjun(2019-04-16)
+          // checkXmlFile() function does not read media_profile.xml.
+          // So applied the code used in nougat.
+            const char *xmlFile = "/vendor/etc/media_profiles.xml";
+            FILE *fp = fopen(xmlFile, "r");
+            if (fp == NULL) {
+                ALOGW("could not find media config xml file");
+                sInstance = createDefaultInstance();
+            } else {
+                fclose(fp);  // close the file first.
+                sInstance = createInstanceFromXmlFile(xmlFile);
+            }
+#endif
         } else {
             sInstance = createInstanceFromXmlFile(value);
         }

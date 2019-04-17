@@ -525,7 +525,12 @@ status_t VideoFrameDecoder::onOutputReceived(
     int32_t srcFormat;
     CHECK(outputFormat->findInt32("color-format", &srcFormat));
 
+#if 0   //  Added by hcjun : Set forced YUV420 Planar for Nexell VPU Video Decoder
+    ColorConverter converter(
+            (OMX_COLOR_FORMATTYPE)OMX_COLOR_FormatYUV420Planar/*srcFormat*/, OMX_COLOR_Format16bitRGB565/*dstFormat*/);
+#else
     ColorConverter converter((OMX_COLOR_FORMATTYPE)srcFormat, dstFormat());
+#endif
 
     if (converter.isValid()) {
         converter.convert(

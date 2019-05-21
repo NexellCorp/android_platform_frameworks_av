@@ -7,7 +7,7 @@
 #
 ################################################################################################
 
-ifeq (1, 0)
+ifeq ($(USE_CONFIGURABLE_AUDIO_POLICY), 1)
 
 LOCAL_PATH := $(call my-dir)
 
@@ -78,9 +78,9 @@ LOCAL_MODULE_STEM := PolicyConfigurableDomains.xml
 LOCAL_MODULE_CLASS := ETC
 LOCAL_MODULE_RELATIVE_PATH := parameter-framework/Settings/Policy
 LOCAL_ADDITIONAL_DEPENDENCIES := \
-        PolicyClass.xml \
-        PolicySubsystem.xml \
-        ParameterFrameworkConfigurationPolicy.xml
+        $(TARGET_OUT_ETC)/parameter-framework/Structure/Policy/PolicyClass.xml \
+        $(TARGET_OUT_ETC)/parameter-framework/Structure/Policy/PolicySubsystem.xml \
+        $(TARGET_OUT_ETC)/parameter-framework/ParameterFrameworkConfigurationPolicy.xml
 
 ifeq ($(pfw_rebuild_settings),true)
 PFW_TOPLEVEL_FILE := $(TARGET_OUT_ETC)/parameter-framework/ParameterFrameworkConfigurationPolicy.xml
@@ -114,9 +114,9 @@ LOCAL_MODULE_STEM := PolicyConfigurableDomains-NoOutputDevice.xml
 LOCAL_MODULE_CLASS := ETC
 LOCAL_MODULE_RELATIVE_PATH := parameter-framework/Settings/Policy
 LOCAL_ADDITIONAL_DEPENDENCIES := \
-        PolicyClass.xml \
-        PolicySubsystem.xml \
-        ParameterFrameworkConfigurationPolicy.xml
+        $(TARGET_OUT_ETC)/parameter-framework/Structure/Policy/PolicyClass.xml \
+        $(TARGET_OUT_ETC)/parameter-framework/Structure/Policy/PolicySubsystem.xml \
+        $(TARGET_OUT_ETC)/parameter-framework/ParameterFrameworkConfigurationPolicy.xml
 
 PFW_TOPLEVEL_FILE := $(TARGET_OUT_ETC)/parameter-framework/ParameterFrameworkConfigurationPolicy.xml
 PFW_CRITERIA_FILE := $(LOCAL_PATH)/policy_criteria.txt
@@ -136,9 +136,9 @@ LOCAL_MODULE_STEM := PolicyConfigurableDomains-NoInputDevice.xml
 LOCAL_MODULE_CLASS := ETC
 LOCAL_MODULE_RELATIVE_PATH := parameter-framework/Settings/Policy
 LOCAL_ADDITIONAL_DEPENDENCIES := \
-        PolicyClass.xml \
-        PolicySubsystem.xml \
-        ParameterFrameworkConfigurationPolicy.xml
+        $(TARGET_OUT_ETC)/parameter-framework/Structure/Policy/PolicyClass.xml \
+        $(TARGET_OUT_ETC)/parameter-framework/Structure/Policy/PolicySubsystem.xml \
+        $(TARGET_OUT_ETC)/parameter-framework/ParameterFrameworkConfigurationPolicy.xml
 
 PFW_TOPLEVEL_FILE := $(TARGET_OUT_ETC)/parameter-framework/ParameterFrameworkConfigurationPolicy.xml
 PFW_CRITERIA_FILE := $(LOCAL_PATH)/policy_criteria.txt
@@ -159,4 +159,4 @@ PFW_EDD_FILES := \
 
 include $(BUILD_PFW_SETTINGS)
 
-endif # ifeq (1, 0)
+endif # ifeq ($(USE_CONFIGURABLE_AUDIO_POLICY), 1)

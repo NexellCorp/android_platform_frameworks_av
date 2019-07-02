@@ -72,6 +72,12 @@ cc_library_shared {
         "-Wno-documentation",
     ],
 
+    product_variables: {
+        en_ffmpegExtractor: {
+            cppflags: ["-DENABLE_FFMPEG_EXTRACTOR"],
+        },
+    },
+
     sanitize: {
         misc_undefined: [
             "signed-integer-overflow",

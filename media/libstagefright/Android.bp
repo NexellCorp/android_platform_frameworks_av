@@ -212,6 +212,10 @@ cc_library_shared {
             // enable experiments only in userdebug and eng builds
             cflags: ["-DENABLE_STAGEFRIGHT_EXPERIMENTS"],
         },
+
+        en_ffmpegExtractor: {
+            cppflags: ["-DENABLE_FFMPEG_EXTRACTOR"],
+        },
     },
 
     sanitize: {

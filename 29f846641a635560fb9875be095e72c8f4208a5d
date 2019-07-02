@@ -1,0 +1,257 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "3239e4b3_81d9ab67",
+        "filename": "media/extractors/mkv/MatroskaExtractor.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 53,
+      "author": {
+        "id": 1015389
+      },
+      "writtenOn": "2019-07-02T06:48:49Z",
+      "side": 1,
+      "message": "Audio?",
+      "range": {
+        "startLine": 53,
+        "startChar": 3,
+        "endLine": 53,
+        "endChar": 7
+      },
+      "revId": "29f846641a635560fb9875be095e72c8f4208a5d",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "04f3153b_bdaa973e",
+        "filename": "media/extractors/mkv/MatroskaExtractor.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1446,
+      "author": {
+        "id": 1015389
+      },
+      "writtenOn": "2019-07-02T06:48:49Z",
+      "side": 1,
+      "message": "#ifdef ENABLE_FFMPEG_EXTRACTOR ?",
+      "range": {
+        "startLine": 1446,
+        "startChar": 0,
+        "endLine": 1446,
+        "endChar": 1
+      },
+      "revId": "29f846641a635560fb9875be095e72c8f4208a5d",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "90c8bec8_f2720f44",
+        "filename": "media/libmediaextractor/include/media/stagefright/MetaDataBase.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 254,
+      "author": {
+        "id": 1015389
+      },
+      "writtenOn": "2019-07-02T06:48:49Z",
+      "side": 1,
+      "message": "Please apply same indentation with below source",
+      "range": {
+        "startLine": 236,
+        "startChar": 0,
+        "endLine": 254,
+        "endChar": 42
+      },
+      "revId": "29f846641a635560fb9875be095e72c8f4208a5d",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "699b05cc_ff2504ba",
+        "filename": "media/libstagefright/ACodec.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 1744,
+      "author": {
+        "id": 1015389
+      },
+      "writtenOn": "2019-07-02T06:48:49Z",
+      "side": 1,
+      "message": "Please add space before {",
+      "range": {
+        "startLine": 1744,
+        "startChar": 35,
+        "endLine": 1744,
+        "endChar": 37
+      },
+      "revId": "29f846641a635560fb9875be095e72c8f4208a5d",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "b284d35b_c41b8cdb",
+        "filename": "media/libstagefright/ACodec.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2364,
+      "author": {
+        "id": 1015389
+      },
+      "writtenOn": "2019-07-02T06:48:49Z",
+      "side": 1,
+      "message": "Please change coding rule to android like below\nif () {\n} else {\n}",
+      "range": {
+        "startLine": 2363,
+        "startChar": 3,
+        "endLine": 2364,
+        "endChar": 5
+      },
+      "revId": "29f846641a635560fb9875be095e72c8f4208a5d",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "9f1de89e_918b8534",
+        "filename": "media/libstagefright/ACodec.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2388,
+      "author": {
+        "id": 1015389
+      },
+      "writtenOn": "2019-07-02T06:48:49Z",
+      "side": 1,
+      "message": "ditto",
+      "range": {
+        "startLine": 2387,
+        "startChar": 7,
+        "endLine": 2388,
+        "endChar": 9
+      },
+      "revId": "29f846641a635560fb9875be095e72c8f4208a5d",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "a0365fe0_fbeb371b",
+        "filename": "media/libstagefright/ACodec.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2390,
+      "author": {
+        "id": 1015389
+      },
+      "writtenOn": "2019-07-02T06:48:49Z",
+      "side": 1,
+      "message": "ditto",
+      "range": {
+        "startLine": 2389,
+        "startChar": 10,
+        "endLine": 2390,
+        "endChar": 13
+      },
+      "revId": "29f846641a635560fb9875be095e72c8f4208a5d",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "e57e086e_58603b85",
+        "filename": "media/libstagefright/ACodec.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2413,
+      "author": {
+        "id": 1015389
+      },
+      "writtenOn": "2019-07-02T06:48:49Z",
+      "side": 1,
+      "message": "ditto",
+      "range": {
+        "startLine": 2412,
+        "startChar": 6,
+        "endLine": 2413,
+        "endChar": 9
+      },
+      "revId": "29f846641a635560fb9875be095e72c8f4208a5d",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "5bddd809_a0e5e0fd",
+        "filename": "media/libstagefright/ACodec.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2418,
+      "author": {
+        "id": 1015389
+      },
+      "writtenOn": "2019-07-02T06:48:49Z",
+      "side": 1,
+      "message": "ditto",
+      "range": {
+        "startLine": 2417,
+        "startChar": 10,
+        "endLine": 2418,
+        "endChar": 13
+      },
+      "revId": "29f846641a635560fb9875be095e72c8f4208a5d",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "1ff57efb_b523e27a",
+        "filename": "media/libstagefright/ACodec.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2438,
+      "author": {
+        "id": 1015389
+      },
+      "writtenOn": "2019-07-02T06:48:49Z",
+      "side": 1,
+      "message": "ditto",
+      "range": {
+        "startLine": 2435,
+        "startChar": 3,
+        "endLine": 2438,
+        "endChar": 5
+      },
+      "revId": "29f846641a635560fb9875be095e72c8f4208a5d",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    },
+    {
+      "key": {
+        "uuid": "c805cd5a_f41e4801",
+        "filename": "media/libstagefright/ACodec.cpp",
+        "patchSetId": 1
+      },
+      "lineNbr": 2443,
+      "author": {
+        "id": 1015389
+      },
+      "writtenOn": "2019-07-02T06:48:49Z",
+      "side": 1,
+      "message": "ditto",
+      "range": {
+        "startLine": 2440,
+        "startChar": 3,
+        "endLine": 2443,
+        "endChar": 13
+      },
+      "revId": "29f846641a635560fb9875be095e72c8f4208a5d",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}

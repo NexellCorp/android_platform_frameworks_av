@@ -43,6 +43,20 @@
 
 namespace android {
 
+#ifdef ENABLE_FFMPEG_EXTRACTOR
+//Added by hcJun
+//////////////////////////////////////////////////////////////////////////////
+//
+//					Nexell Extended Media Defines
+//
+
+//	Audio
+extern const char *MEDIA_MIMETYPE_AUDIO_DTS;
+
+//
+//////////////////////////////////////////////////////////////////////////////
+#endif
+
 struct DataSourceBaseReader : public mkvparser::IMkvReader {
     explicit DataSourceBaseReader(DataSourceBase *source)
         : mSource(source) {
@@ -1537,6 +1551,15 @@ void MatroskaExtractor::addTracks() {
                     mSeekPreRollNs = track->GetSeekPreRoll();
                 } else if (!strcmp("A_MPEG/L3", codecID)) {
                     meta.setCString(kKeyMIMEType, MEDIA_MIMETYPE_AUDIO_MPEG);
+#ifdef ENABLE_FFMPEG_EXTRACTOR
+                //  Added by hcjun Support AC3 & FLAC Container
+                } else if (!strcmp("A_AC3", codecID)) {
+                    meta.setCString(kKeyMIMEType, MEDIA_MIMETYPE_AUDIO_AC3);
+                } else if (!strcmp("A_FLAC", codecID)) {
+                    meta.setCString(kKeyMIMEType, MEDIA_MIMETYPE_AUDIO_FLAC);
+                } else if (!strcmp("A_DTS", codecID)) {
+                    meta.setCString(kKeyMIMEType, MEDIA_MIMETYPE_AUDIO_DTS);
+#endif
                 } else if (!strcmp("A_FLAC", codecID)) {
                     meta.setCString(kKeyMIMEType, MEDIA_MIMETYPE_AUDIO_FLAC);
                     err = addFlacMetadata(meta, codecPrivate, codecPrivateSize);

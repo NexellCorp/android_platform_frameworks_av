@@ -42,6 +42,11 @@ static bool FileHasAcceptableExtension(const char *extension) {
         ".mkv", ".mka", ".webm", ".ts", ".fl", ".flac", ".mxmf",
         ".avi", ".mpeg", ".mpg", ".awb", ".mpga", ".mov",
         ".m4v", ".oga"
+
+#ifdef ENABLE_FFMPEG_EXTRACTOR
+        // Added by hcjun
+        ,".rmvb", ".asf", ".wmv", ".rv", ".trp", ".tp", ".rm", ".flv", ".m2ts"
+#endif
     };
     static const size_t kNumValidExtensions =
         sizeof(kValidExtensions) / sizeof(kValidExtensions[0]);

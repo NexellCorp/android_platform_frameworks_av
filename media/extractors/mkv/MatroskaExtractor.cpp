@@ -1429,6 +1429,24 @@ void MatroskaExtractor::addTracks() {
                                 codecID);
                         continue;
                     }
+#if 1   //  Added by hcjun for XVID
+                } else if (!strcmp("V_MS/VFW/FOURCC", codecID)) {
+                    if (codecPrivateSize >= 40) {
+                        uint32_t fourcc;
+                        memcpy(&fourcc, codecPrivate+16, 4);
+                        if( fourcc != 0x44495658) {   //  "XVID"
+                            ALOGW("%s is detected, but does not support fourcc 0x%x.",
+                                    codecID, fourcc);
+                            continue;
+                        }
+                        meta.setCString(
+                                kKeyMIMEType, MEDIA_MIMETYPE_VIDEO_MPEG4);
+                    } else {
+                        ALOGW("%s is detected, but too short codecPrivate data.",
+                                codecID);
+                        continue;
+                    }
+#endif
                 } else if (!strcmp("V_VP8", codecID)) {
                     meta.setCString(kKeyMIMEType, MEDIA_MIMETYPE_VIDEO_VP8);
                 } else if (!strcmp("V_VP9", codecID)) {

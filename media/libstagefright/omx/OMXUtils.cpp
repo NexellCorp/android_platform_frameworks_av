@@ -29,6 +29,32 @@
 
 namespace android {
 
+#ifdef ENABLE_FFMPEG_EXTRACTOR
+//Added by hcJun
+//////////////////////////////////////////////////////////////////////////////
+//
+//                  Nexell Extended Media Defines
+//
+
+//  Video
+extern const char *MEDIA_MIMETYPE_VIDEO_WMV;
+extern const char *MEDIA_MIMETYPE_VIDEO_RV;
+extern const char *MEDIA_MIMETYPE_VIDEO_VC1;
+extern const char *MEDIA_MIMETYPE_VIDEO_WVC1;
+extern const char *MEDIA_MIMETYPE_VIDEO_FLV;
+extern const char *MEDIA_MIMETYPE_VIDEO_MP43;
+extern const char *MEDIA_MIMETYPE_VIDEO_DIV3;
+
+//  Audo
+extern const char *MEDIA_MIMETYPE_AUDIO_RA;
+extern const char *MEDIA_MIMETYPE_AUDIO_WMA;
+extern const char *MEDIA_MIMETYPE_AUDIO_APE;
+extern const char *MEDIA_MIMETYPE_AUDIO_DTS;
+
+//
+//////////////////////////////////////////////////////////////////////////////
+#endif
+
 status_t StatusFromOMXError(OMX_ERRORTYPE err) {
     switch (err) {
         case OMX_ErrorNone:
@@ -165,6 +191,33 @@ const char *GetComponentRole(bool isEncoder, const char *mime) {
             "audio_decoder.eac3", "audio_encoder.eac3" },
         { MEDIA_MIMETYPE_IMAGE_ANDROID_HEIC,
             "image_decoder.heic", "image_encoder.heic" },
+
+#ifdef ENABLE_FFMPEG_EXTRACTOR
+        //  Added By hcjun
+        { MEDIA_MIMETYPE_VIDEO_WMV,
+             "video_decoder.x-ms-wmv", "video_encoder.x-ms-wmv" },
+        { MEDIA_MIMETYPE_VIDEO_WVC1,
+            "video_decoder.wvc1", "video_encoder.wvc1" },
+        { MEDIA_MIMETYPE_VIDEO_VC1,
+            "video_decoder.vc1", "video_encoder.vc1" },
+        { MEDIA_MIMETYPE_VIDEO_RV,
+             "video_decoder.x-pn-realvideo", "video_encoder.x-pn-realvideo" },
+        { MEDIA_MIMETYPE_VIDEO_FLV,
+             "video_decoder.x-flv", "video_encoder.x-flv" },
+        { MEDIA_MIMETYPE_VIDEO_MP43,
+             "video_decoder.mp43", "video_encoder.mp43" },
+        { MEDIA_MIMETYPE_VIDEO_DIV3,
+             "video_decoder.div3", "video_encoder.div3" },
+
+        { MEDIA_MIMETYPE_AUDIO_DTS,
+             "audio_decoder.dts", "audio_encoder.dts" },
+        { MEDIA_MIMETYPE_AUDIO_RA,
+             "audio_decoder.ra", "audio_encoder.ra" },
+        { MEDIA_MIMETYPE_AUDIO_WMA,
+             "audio_decoder.x-ms-wma", "audio_encoder.x-ms-wma" },
+        { MEDIA_MIMETYPE_AUDIO_APE,
+             "audio_decoder.ape", "audio_encoder.ape" },
+#endif
     };
 
     static const size_t kNumMimeToRole =

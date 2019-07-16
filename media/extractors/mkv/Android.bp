@@ -34,6 +34,12 @@ cc_library_shared {
     ],
     version_script: "exports.lds",
 
+    product_variables: {
+        en_ffmpegExtractor: {
+            cppflags: ["-DENABLE_FFMPEG_EXTRACTOR"],
+        },
+    },
+
     sanitize: {
         cfi: true,
         misc_undefined: [

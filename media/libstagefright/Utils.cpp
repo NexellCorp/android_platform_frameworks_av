@@ -47,6 +47,37 @@
 
 namespace android {
 
+
+#ifdef ENABLE_FFMPEG_EXTRACTOR
+//Added by hcJun
+//////////////////////////////////////////////////////////////////////////////
+//
+//					Nexell Extended Media Defines
+//
+
+//	Audo
+extern const char *MEDIA_MIMETYPE_AUDIO_RA;
+extern const char *MEDIA_MIMETYPE_AUDIO_WMA;
+extern const char *MEDIA_MIMETYPE_AUDIO_APE;
+extern const char *MEDIA_MIMETYPE_AUDIO_DTS;
+//
+//////////////////////////////////////////////////////////////////////////////
+#endif
+
+#ifdef ENABLE_FFMPEG_EXTRACTOR
+//  Added by hcjun for Nexell Audio Decoders.
+#define OMX_IndexParamAudioAc3  (OMX_IndexVendorStartUnused + 0xE0000 + 0x00)
+#define OMX_IndexParamAudioDTS  (OMX_IndexVendorStartUnused + 0xE0000 + 0x01)
+#define OMX_IndexParamAudioFLAC (OMX_IndexVendorStartUnused + 0xE0000 + 0x02)
+#define OMX_IndexParamAudioAPE  (OMX_IndexVendorStartUnused + 0xE0000 + 0x03)
+
+#define OMX_AUDIO_CodingAC3     (OMX_AUDIO_CodingVendorStartUnused + 0xE0000 + 0x00)
+#define OMX_AUDIO_CodingDTS     (OMX_AUDIO_CodingVendorStartUnused + 0xE0000 + 0x01)
+#define OMX_AUDIO_CodingFLAC    (OMX_AUDIO_CodingVendorStartUnused + 0xE0000 + 0x02)
+#define OMX_AUDIO_CodingAPE     (OMX_AUDIO_CodingVendorStartUnused + 0xE0000 + 0x03)
+#endif
+
+
 static status_t copyNALUToABuffer(sp<ABuffer> *buffer, const uint8_t *ptr, size_t length) {
     if (((*buffer)->size() + 4 + length) > ((*buffer)->capacity() - (*buffer)->offset())) {
         sp<ABuffer> tmpBuffer = new (std::nothrow) ABuffer((*buffer)->size() + 4 + length + 1024);
@@ -637,6 +668,49 @@ status_t convertMetaDataToMessage(
     if (meta->findInt32(kKeyTrackID, &trackID)) {
         msg->setInt32("track-id", trackID);
     }
+
+#ifdef ENABLE_FFMPEG_EXTRACTOR
+    // Added by hcjun
+    int32_t blockAlign;
+    if (meta->findInt32(kKeyBlockAlign, &blockAlign)) {
+        msg->setInt32("block-align", blockAlign);
+    }
+
+    int32_t bitPerSample;
+    if (meta->findInt32(kKeyBitspersample, &bitPerSample)) {
+        msg->setInt32("bit-per-sample", bitPerSample);
+    }
+
+    int32_t wmaVersion;
+    if( meta->findInt32(kKeyWMAVersion, &wmaVersion ) ) {
+        msg->setInt32( "ffmpeg-wma-version", wmaVersion );
+    }
+
+    int32_t wmvVersion;
+    if( meta->findInt32(kKeyWMVVersion, &wmvVersion ) ) {
+        msg->setInt32( "ffmpeg-wmv-version", wmvVersion );
+    }
+
+    {
+        int32_t codecTag;
+        if( meta->findInt32(kKeyFFCodecTag, &codecTag ) ) {
+            msg->setInt32( "ffmpeg-codec-tag", codecTag );
+        }
+
+        uint32_t type;
+        const void *data;
+        size_t size;
+        if( meta->findData(kKeyRawCodecSpecificData, &type, &data, &size) ) {
+            if( size > 0 ) {
+                sp<ABuffer> buffer = new ABuffer(64*1024);
+                buffer->setRange(0, 0);
+                memcpy( buffer->data() + buffer->size() , data, size );
+                buffer->setRange(0, buffer->size() + size);
+                msg->setBuffer( "ffmpeg-extra-data", buffer );
+            }
+        }
+    }
+#endif
 
     const char *lang;
     if (meta->findCString(kKeyMediaLanguage, &lang)) {
@@ -1578,6 +1652,19 @@ static const struct mime_conv_t mimeLookup[] = {
     { MEDIA_MIMETYPE_AUDIO_OPUS,        AUDIO_FORMAT_OPUS},
     { MEDIA_MIMETYPE_AUDIO_AC3,         AUDIO_FORMAT_AC3},
     { MEDIA_MIMETYPE_AUDIO_FLAC,        AUDIO_FORMAT_FLAC},
+
+#ifdef ENABLE_FFMPEG_EXTRACTOR
+    //  Added by hcjun for audio mime-type
+    { MEDIA_MIMETYPE_AUDIO_MPEG_LAYER_I,AUDIO_FORMAT_DEFAULT },
+    { MEDIA_MIMETYPE_AUDIO_MPEG_LAYER_II,AUDIO_FORMAT_DEFAULT },
+    { MEDIA_MIMETYPE_AUDIO_AC3,         AUDIO_FORMAT_DEFAULT },
+    { MEDIA_MIMETYPE_AUDIO_DTS,         AUDIO_FORMAT_DEFAULT },
+    { MEDIA_MIMETYPE_AUDIO_RA,          AUDIO_FORMAT_DEFAULT },
+    { MEDIA_MIMETYPE_AUDIO_WMA,         AUDIO_FORMAT_DEFAULT },
+    { MEDIA_MIMETYPE_AUDIO_FLAC,        AUDIO_FORMAT_DEFAULT },
+    { MEDIA_MIMETYPE_AUDIO_APE,         AUDIO_FORMAT_DEFAULT },
+#endif
+
     { 0, AUDIO_FORMAT_INVALID }
 };
 

@@ -1,0 +1,27 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "e73a011a_9651f10c",
+        "filename": "media/libstagefright/ACodec.cpp",
+        "patchSetId": 2
+      },
+      "lineNbr": 2230,
+      "author": {
+        "id": 1015389
+      },
+      "writtenOn": "2019-07-17T03:32:48Z",
+      "side": 1,
+      "message": "Is this right comment?\nI can\u0027t understand.",
+      "range": {
+        "startLine": 2230,
+        "startChar": 33,
+        "endLine": 2230,
+        "endChar": 63
+      },
+      "revId": "b813b9b29934c1b8fc4b903678032b302a433ba0",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}

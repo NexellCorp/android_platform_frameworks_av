@@ -42,5 +42,9 @@ cc_binary {
 
     compile_multilib: "32",
 
-    init_rc: ["drmserver.rc"],
+    product_variables: {
+        normalboot: {
+            init_rc: ["drmserver.rc"],
+        },
+    },
 }

@@ -1,0 +1,6 @@
+service cameraserver /system/bin/cameraserver
+    class main
+    user cameraserver
+    group audio camera input drmrpc
+    ioprio rt 4
+    rlimit rtprio 10 10

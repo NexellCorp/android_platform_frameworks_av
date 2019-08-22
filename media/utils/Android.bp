@@ -35,6 +35,17 @@ cc_library {
         "-Werror",
     ],
 
+    product_variables: {
+        quickboot: {
+            cppflags: [
+                "-DQUICKBOOT",
+            ],
+            cflags: [
+                "-DQUICKBOOT",
+            ]
+        },
+    },
+
     local_include_dirs: ["include"],
     export_include_dirs: ["include"],
 }

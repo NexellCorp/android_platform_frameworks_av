@@ -25,6 +25,7 @@
 
 namespace android {
 
+#ifndef QUICKBOOT
 void BatteryNotifier::DeathNotifier::binderDied(const wp<IBinder>& /*who*/) {
     BatteryNotifier::getInstance().onBatteryStatServiceDied();
 }
@@ -223,6 +224,59 @@ sp<IBatteryStats> BatteryNotifier::getBatteryService_l() {
     }
     return mBatteryStatService;
 }
+#else
+void BatteryNotifier::DeathNotifier::binderDied(const wp<IBinder>& /*who*/) {
+}
+
+BatteryNotifier::BatteryNotifier() {}
+
+BatteryNotifier::~BatteryNotifier() {
+}
+
+void BatteryNotifier::noteStartVideo(uid_t /*uid*/) {
+}
+
+void BatteryNotifier::noteStopVideo(uid_t /*uid*/) {
+}
+
+void BatteryNotifier::noteResetVideo() {
+}
+
+void BatteryNotifier::noteStartAudio(uid_t /*uid*/) {
+}
+
+void BatteryNotifier::noteStopAudio(uid_t /*uid*/) {
+}
+
+void BatteryNotifier::noteResetAudio() {
+}
+
+void BatteryNotifier::noteFlashlightOn(const String8& /*id*/, uid_t /*uid*/) {
+}
+
+void BatteryNotifier::noteFlashlightOff(const String8& /*id*/, uid_t /*uid*/) {
+}
+
+void BatteryNotifier::noteResetFlashlight() {
+}
+
+void BatteryNotifier::noteStartCamera(const String8& /*id*/, uid_t /*uid*/) {
+}
+
+void BatteryNotifier::noteStopCamera(const String8& /*id*/, uid_t /*uid*/) {
+}
+
+void BatteryNotifier::noteResetCamera() {
+}
+
+void BatteryNotifier::onBatteryStatServiceDied() {
+
+}
+
+sp<IBatteryStats> BatteryNotifier::getBatteryService_l() {
+    return nullptr;
+}
+#endif
 
 ANDROID_SINGLETON_STATIC_INSTANCE(BatteryNotifier);
 

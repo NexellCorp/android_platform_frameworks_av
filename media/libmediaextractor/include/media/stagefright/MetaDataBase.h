@@ -227,10 +227,9 @@ enum {
     kKeyIsExif           = 'exif', // bool (int32_t) buffer contains exif data block
 };
 
-#ifdef ENABLE_FFMPEG_EXTRACTOR
 //Added by hcJun
 //
-//      For Nexell FFMPEG Extractor
+//  For Nexell FFMPEG Extractor
 //
 enum {
     kKeyRawCodecSpecificData = 'rcsd',
@@ -253,7 +252,7 @@ enum {
     kKeyFFCodecTag           = 'ffct',
     kKeyMpegAudioLayer       = 'mpgl',
 };
-#endif
+
 
 enum {
     kTypeESDS        = 'esds',

@@ -192,7 +192,9 @@ const char *GetComponentRole(bool isEncoder, const char *mime) {
         { MEDIA_MIMETYPE_IMAGE_ANDROID_HEIC,
             "image_decoder.heic", "image_encoder.heic" },
 
-#ifdef ENABLE_FFMPEG_EXTRACTOR
+        //
+        //  For Nexell FFMPEG Extractor
+        //
         //  Added By hcjun
         { MEDIA_MIMETYPE_VIDEO_WMV,
              "video_decoder.x-ms-wmv", "video_encoder.x-ms-wmv" },
@@ -217,7 +219,6 @@ const char *GetComponentRole(bool isEncoder, const char *mime) {
              "audio_decoder.x-ms-wma", "audio_encoder.x-ms-wma" },
         { MEDIA_MIMETYPE_AUDIO_APE,
              "audio_decoder.ape", "audio_encoder.ape" },
-#endif
     };
 
     static const size_t kNumMimeToRole =

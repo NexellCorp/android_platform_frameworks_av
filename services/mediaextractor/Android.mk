@@ -33,6 +33,11 @@ LOCAL_REQUIRED_MODULES += \
     liboggextractor \
     libwavextractor \
 
+ifeq ($(EN_FFMPEG_EXTRACTOR),true)
+# extractor libraries
+LOCAL_REQUIRED_MODULES += libNX_FFMpegExtractor
+endif
+
 LOCAL_SRC_FILES := main_extractorservice.cpp
 LOCAL_SHARED_LIBRARIES := libmedia libmediaextractorservice libbinder libutils \
     liblog libbase libicuuc libavservices_minijail

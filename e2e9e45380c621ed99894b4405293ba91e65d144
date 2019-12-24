@@ -1,0 +1,21 @@
+{
+  "comments": [
+    {
+      "key": {
+        "uuid": "21cc89c5_12660f16",
+        "filename": "media/libstagefright/foundation/include/media/stagefright/foundation/MediaDefs.h",
+        "patchSetId": 1
+      },
+      "lineNbr": 82,
+      "author": {
+        "id": 1015509
+      },
+      "writtenOn": "2019-12-24T04:17:35Z",
+      "side": 1,
+      "message": "please add macro \"#ifdef ENABLE_FFMPEG_EXTRACTOR\"",
+      "revId": "e2e9e45380c621ed99894b4405293ba91e65d144",
+      "serverId": "d5d70762-12d0-45a1-890d-524b12d3f735",
+      "unresolved": true
+    }
+  ]
+}

@@ -45,7 +45,7 @@ static bool FileHasAcceptableExtension(const char *extension) {
 
 #ifdef ENABLE_FFMPEG_EXTRACTOR
         // Added by hcjun
-        ,".rmvb", ".asf", ".wmv", ".rv", ".trp", ".tp", ".rm", ".flv", ".m2ts"
+        ,".rmvb", ".asf", ".wmv", ".rv", ".trp", ".tp", ".rm", ".flv", ".m2ts", ".ape"
 #endif
     };
     static const size_t kNumValidExtensions =

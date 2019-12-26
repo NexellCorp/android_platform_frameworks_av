@@ -5,6 +5,12 @@ cc_library_shared {
         enabled: true,
     },
 
+    product_variables: {
+        en_ffmpegExtractor: {
+            cppflags: ["-DENABLE_FFMPEG_EXTRACTOR"],
+        },
+    },
+
     srcs: [
         "BWGraphicBufferSource.cpp",
         "OMXMaster.cpp",
@@ -72,12 +78,6 @@ cc_library_shared {
         "-Wno-documentation",
     ],
 
-    product_variables: {
-        en_ffmpegExtractor: {
-            cppflags: ["-DENABLE_FFMPEG_EXTRACTOR"],
-        },
-    },
-
     sanitize: {
         misc_undefined: [
             "signed-integer-overflow",
@@ -96,6 +96,13 @@ cc_library_shared {
     vndk: {
         enabled: true,
     },
+
+    product_variables: {
+        en_ffmpegExtractor: {
+            cppflags: ["-DENABLE_FFMPEG_EXTRACTOR"],
+        },
+    },
+
     srcs: ["OMXUtils.cpp"],
     export_include_dirs: [
         "include",

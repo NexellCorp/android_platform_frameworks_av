@@ -37,7 +37,7 @@ LOCAL_32_BIT_ONLY := true
 
 LOCAL_CFLAGS += -Wall -Wextra -Werror -Wno-unused-parameter
 
-ifeq ($(NEXELL_QUICKBOOT), false)
+ifeq ($(CAMERA_SERVER_QUICKBOOT), false)
 LOCAL_INIT_RC := cameraserver.rc
 endif
 

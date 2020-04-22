@@ -43,7 +43,7 @@ ifneq ($(TARGET_ENABLE_MEDIADRM_64), true)
 LOCAL_32_BIT_ONLY := true
 endif
 
-ifeq ($(NEXELL_QUICKBOOT), false)
+ifeq ($(MEDIA_DRM_SERVER_QUICKBOOT), false)
 LOCAL_INIT_RC := mediadrmserver.rc
 endif
 

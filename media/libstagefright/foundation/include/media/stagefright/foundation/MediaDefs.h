@@ -101,6 +101,7 @@ extern const char *MEDIA_MIMETYPE_VIDEO_WVC1;
 extern const char *MEDIA_MIMETYPE_VIDEO_FLV;
 extern const char *MEDIA_MIMETYPE_VIDEO_MP43;
 extern const char *MEDIA_MIMETYPE_VIDEO_DIV3;
+extern const char *MEDIA_MIMETYPE_VIDEO_XVID;
 
 //	Audo
 extern const char *MEDIA_MIMETYPE_AUDIO_RA;

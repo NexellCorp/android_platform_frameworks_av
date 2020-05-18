@@ -79,6 +79,7 @@ extern const char *MEDIA_MIMETYPE_VIDEO_WVC1;
 extern const char *MEDIA_MIMETYPE_VIDEO_FLV;
 extern const char *MEDIA_MIMETYPE_VIDEO_MP43;
 extern const char *MEDIA_MIMETYPE_VIDEO_DIV3;
+extern const char *MEDIA_MIMETYPE_VIDEO_XVID;
 
 //	Audo
 extern const char *MEDIA_MIMETYPE_AUDIO_RA;
@@ -3799,6 +3800,7 @@ static const struct VideoCodingMapEntry {
     { MEDIA_MIMETYPE_VIDEO_FLV, OMX_VIDEO_CodingMPEG4 },
     { MEDIA_MIMETYPE_VIDEO_MP43, OMX_VIDEO_CodingMPEG4 },
     { MEDIA_MIMETYPE_VIDEO_DIV3, OMX_VIDEO_CodingMPEG4 },
+    { MEDIA_MIMETYPE_VIDEO_XVID, OMX_VIDEO_CodingMPEG4 },
 #endif
 
 };

@@ -44,6 +44,7 @@ extern const char *MEDIA_MIMETYPE_VIDEO_WVC1;
 extern const char *MEDIA_MIMETYPE_VIDEO_FLV;
 extern const char *MEDIA_MIMETYPE_VIDEO_MP43;
 extern const char *MEDIA_MIMETYPE_VIDEO_DIV3;
+extern const char *MEDIA_MIMETYPE_VIDEO_XVID;
 
 //  Audo
 extern const char *MEDIA_MIMETYPE_AUDIO_RA;
@@ -208,6 +209,8 @@ const char *GetComponentRole(bool isEncoder, const char *mime) {
              "video_decoder.mp43", "video_encoder.mp43" },
         { MEDIA_MIMETYPE_VIDEO_DIV3,
              "video_decoder.div3", "video_encoder.div3" },
+        { MEDIA_MIMETYPE_VIDEO_XVID,
+             "video_decoder.xvid", "video_encoder.xvid" },
 
         { MEDIA_MIMETYPE_AUDIO_DTS,
              "audio_decoder.dts", "audio_encoder.dts" },

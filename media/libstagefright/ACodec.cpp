@@ -1705,6 +1705,9 @@ const char *ACodec::getComponentRole(
              "video_decoder.mp43", "video_encoder.mp43" },
         { MEDIA_MIMETYPE_VIDEO_DIV3,
              "video_decoder.div3", "video_encoder.div3" },
+        { MEDIA_MIMETYPE_VIDEO_XVID,
+             "video_decoder.xvid", "video_encoder.xvid" },
+
 
         { MEDIA_MIMETYPE_AUDIO_DTS,
              "audio_decoder.dts", "audio_encoder.dts" },
@@ -3795,6 +3798,7 @@ static const struct VideoCodingMapEntry {
     { MEDIA_MIMETYPE_VIDEO_FLV, OMX_VIDEO_CodingMPEG4 },
     { MEDIA_MIMETYPE_VIDEO_MP43, OMX_VIDEO_CodingMPEG4 },
     { MEDIA_MIMETYPE_VIDEO_DIV3, OMX_VIDEO_CodingMPEG4 },
+    { MEDIA_MIMETYPE_VIDEO_XVID, OMX_VIDEO_CodingMPEG4 },
 #endif
 
 };

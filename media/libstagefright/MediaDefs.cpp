@@ -84,6 +84,7 @@ const char *MEDIA_MIMETYPE_VIDEO_RV = "video/x-pn-realvideo";
 const char *MEDIA_MIMETYPE_VIDEO_FLV = "video/x-flv";
 const char *MEDIA_MIMETYPE_VIDEO_MP43 = "video/mp43";
 const char *MEDIA_MIMETYPE_VIDEO_DIV3 = "video/div3";
+const char *MEDIA_MIMETYPE_VIDEO_XVID = "video/xvid";
 const char *MEDIA_MIMETYPE_VIDEO_WMV = "video/x-ms-wmv";
 
 //	Audio

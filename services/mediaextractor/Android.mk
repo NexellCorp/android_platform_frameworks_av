@@ -36,6 +36,7 @@ LOCAL_REQUIRED_MODULES += \
 ifeq ($(EN_FFMPEG_EXTRACTOR),true)
 # extractor libraries
 LOCAL_REQUIRED_MODULES += libNX_FFMpegExtractor
+LOCAL_REQUIRED_MODULES += libNX_FFMpegAVIExtractor
 endif
 
 LOCAL_SRC_FILES := main_extractorservice.cpp

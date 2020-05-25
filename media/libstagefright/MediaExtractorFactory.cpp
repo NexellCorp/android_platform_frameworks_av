@@ -142,9 +142,19 @@ MediaExtractor::CreatorFunc MediaExtractorFactory::sniff(
         plugins = gPlugins;
     }
 
+#ifdef ENABLE_FFMPEG_EXTRACTOR
+    //  hcjun : for FFMPEG Extractor
+    auto it_end = plugins->end();
+    it_end--;
+#endif
+
     MediaExtractor::CreatorFunc curCreator = NULL;
     MediaExtractor::CreatorFunc bestCreator = NULL;
+#ifdef ENABLE_FFMPEG_EXTRACTOR
+    for (auto it = plugins->begin(); it != it_end; ++it) {
+#else
     for (auto it = plugins->begin(); it != plugins->end(); ++it) {
+#endif
         float newConfidence;
         void *newMeta = nullptr;
         MediaExtractor::FreeMetaFunc newFreeMeta = nullptr;
@@ -165,6 +175,35 @@ MediaExtractor::CreatorFunc MediaExtractorFactory::sniff(
             }
         }
     }
+
+#ifdef ENABLE_FFMPEG_EXTRACTOR
+    //  hcjun : This is for FFMPEG Sniffer
+    if( (*confidence) == 0.0 ) {
+        auto it = plugins->end();
+        it--;
+
+        float newConfidence;
+        void *newMeta = nullptr;
+        MediaExtractor::FreeMetaFunc newFreeMeta = nullptr;
+
+         if ((curCreator = (*it)->def.sniff(source, &newConfidence, &newMeta, &newFreeMeta))) {
+            if (newConfidence > *confidence) {
+                *confidence = newConfidence;
+                if (*meta != nullptr && *freeMeta != nullptr) {
+                    (*freeMeta)(*meta);
+                }
+                *meta = newMeta;
+                *freeMeta = newFreeMeta;
+                plugin = *it;
+                bestCreator = curCreator;
+            } else {
+                if (newMeta != nullptr && newFreeMeta != nullptr) {
+                    newFreeMeta(newMeta);
+                }
+            }
+        }
+    }
+#endif
 
     return bestCreator;
 }
@@ -260,6 +299,7 @@ void MediaExtractorFactory::RegisterExtractorsInApk(
 }
 
 //static
+#if 0 //org
 void MediaExtractorFactory::RegisterExtractorsInSystem(
         const char *libDirPath, List<sp<ExtractorPlugin>> &pluginList) {
     ALOGV("search for plugins at %s", libDirPath);
@@ -290,6 +330,29 @@ void MediaExtractorFactory::RegisterExtractorsInSystem(
         ALOGE("couldn't opendir(%s)", libDirPath);
     }
 }
+#else
+void MediaExtractorFactory::RegisterExtractorsInSystem(
+        const char *libDirPath, List<sp<ExtractorPlugin>> &pluginList) {
+    ALOGV("search for plugins at %s", libDirPath);
+    String8 libPath = String8(libDirPath);
+
+    void *libHandle = dlopen(libPath.string(), RTLD_NOW | RTLD_LOCAL);
+    if (libHandle) {
+        MediaExtractor::GetExtractorDef getDef =
+            (MediaExtractor::GetExtractorDef) dlsym(libHandle, "GETEXTRACTORDEF");
+        if (getDef) {
+            ALOGV("registering sniffer for %s", libPath.string());
+                RegisterExtractor(
+                    new ExtractorPlugin(getDef(), libHandle, libPath), pluginList);
+        } else {
+            ALOGW("%s does not contain sniffer", libPath.string());
+            dlclose(libHandle);
+        }
+    } else {
+        ALOGW("couldn't dlopen(%s) %s", libPath.string(), strerror(errno));
+    }
+}
+#endif
 
 // static
 void MediaExtractorFactory::UpdateExtractors(const char *newUpdateApkPath) {
@@ -303,6 +366,8 @@ void MediaExtractorFactory::UpdateExtractors(const char *newUpdateApkPath) {
 
     std::shared_ptr<List<sp<ExtractorPlugin>>> newList(new List<sp<ExtractorPlugin>>());
 
+#if 0  //org  
+
     RegisterExtractorsInSystem("/system/lib"
 #ifdef __LP64__
             "64"
@@ -314,6 +379,28 @@ void MediaExtractorFactory::UpdateExtractors(const char *newUpdateApkPath) {
             "64"
 #endif
             "/extractors", *newList);
+#else
+    //
+    //  hcjun : Don't change Sniffer Ordering(Best Media Scaning)
+    //
+    RegisterExtractorsInSystem("/system/lib/extractors/libmp4extractor.so", *newList);
+    RegisterExtractorsInSystem("/system/lib/extractors/libmkvextractor.so", *newList);
+    RegisterExtractorsInSystem("/system/lib/extractors/liboggextractor.so", *newList);
+    RegisterExtractorsInSystem("/system/lib/extractors/libwavextractor.so", *newList);
+    RegisterExtractorsInSystem("/system/lib/extractors/libflacextractor.so", *newList);
+    RegisterExtractorsInSystem("/system/lib/extractors/libamrextractor.so", *newList);
+    RegisterExtractorsInSystem("/system/lib/extractors/libmpeg2extractor.so", *newList);
+#ifdef ENABLE_FFMPEG_EXTRACTOR
+    RegisterExtractorsInSystem("/vendor/lib/extractors/libNX_FFMpegAVIExtractor.so", *newList);
+#endif
+    RegisterExtractorsInSystem("/system/lib/extractors/libmp3extractor.so", *newList);
+    RegisterExtractorsInSystem("/system/lib/extractors/libaacextractor.so", *newList);
+    RegisterExtractorsInSystem("/system/lib/extractors/libmidiextractor.so", *newList);
+#ifdef ENABLE_FFMPEG_EXTRACTOR
+    RegisterExtractorsInSystem("/vendor/lib/extractors/libNX_FFMpegExtractor.so", *newList);
+#endif
+
+#endif  //org
 
     if (newUpdateApkPath != nullptr) {
         RegisterExtractorsInApk(newUpdateApkPath, *newList);

@@ -687,6 +687,14 @@ static MediaExtractor::CreatorFunc Sniff(
         return NULL;
     }
 
+    // add hcjun 2020-07-09
+    // add flv check(flv+mp3)
+    // because if there is mp3 in the flv file,
+    //  it is imported into mp3Extractor.
+    if (!memcmp(mpeg_header, "FLV", 3)) {
+        return NULL;
+    }
+
     if (!memcmp("\x00\x00\x01\xba", mpeg_header, 4) && (mpeg_header[4] >> 4) == 2) {
         ALOGV("MPEG1PS container is not supported!");
         return NULL;

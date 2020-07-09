@@ -384,7 +384,11 @@ void MediaExtractorFactory::UpdateExtractors(const char *newUpdateApkPath) {
     //  hcjun : Don't change Sniffer Ordering(Best Media Scaning)
     //
     RegisterExtractorsInSystem("/system/lib/extractors/libmp4extractor.so", *newList);
+#ifdef ENABLE_FFMPEG_EXTRACTOR
+    RegisterExtractorsInSystem("/vendor/lib/extractors/libNX_FFMpegMKVExtractor.so", *newList);
+#else
     RegisterExtractorsInSystem("/system/lib/extractors/libmkvextractor.so", *newList);
+#endif
     RegisterExtractorsInSystem("/system/lib/extractors/liboggextractor.so", *newList);
     RegisterExtractorsInSystem("/system/lib/extractors/libwavextractor.so", *newList);
     RegisterExtractorsInSystem("/system/lib/extractors/libflacextractor.so", *newList);
